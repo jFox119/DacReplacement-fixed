@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
+from django.urls import reverse  # To generate URLS by reversing URL patterns
 
 
 # Create your models here.
@@ -22,7 +23,11 @@ class Client(models.Model):
 
     def __str__(self):
         """String for representing the Model object."""
-        return f'{self.last_name}, {self.first_name}'
+        return f'{self.last_name}, {self.first_name}' 
+    
+    def get_absolute_url(self):
+        """Returns the url to access a particular book record."""
+        return reverse('client-detail', args=[str(self.id)])
     
 class IdentificationType(models.Model):
     name = models.CharField(max_length=100)
@@ -87,3 +92,4 @@ class Premium(models.Model):
         db_table = "Premium"
         verbose_name = 'Premium'
         
+

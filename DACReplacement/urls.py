@@ -21,4 +21,5 @@ urlpatterns = [
     #path('invoice/', include("invoice.urls")),   # Used to specify invoice
     path('', include("invoice.urls")),              # used to default the project to invoice
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')), #(for login, logout, password management)
 ]

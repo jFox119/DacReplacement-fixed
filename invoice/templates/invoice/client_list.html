@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="drawer drawer-open">
+  <input id="my-drawer" type="checkbox" class="drawer-toggle " />
+  <div class="drawer-content p-4">
+    <!-- Page content here -->
+    <h1 class="text-2xl underline text-accent">Client List</h1>
+    <div class="p-4 text-white">
+      {% if client_list %}
+        <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Address</th>
+              </tr>
+            </thead>
+            <tbody id="client-table-body">
+              {% for client in client_list %}
+                <tr data-item-id="{{client.id}}">
+                  <td>{{client.first_name}}</td>
+                  <td>{{client.last_name}}</td>
+                  <td>{{client.address}}</td>
+                  <td>
+                    <button class="btn btn-primary" onclick="edit_client_modal.showModal()">Edit</button>
+                    {% include 'invoice/edit-client-modal.html' %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p>There are no clients in the system.</p>
+      {% endif %}
+    </div>
+  </div> 
+  <div class="drawer-side menu p-4 min-h-full bg-base-200 text-base-content">
+    <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+    <label class="input input-bordered flex items-center gap-2">
+      <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <g
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          stroke-width="2.5"
+          fill="none"
+          stroke="currentColor"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </g>
+      </svg>
+      <input type="search" class="grow" placeholder="Search" />
+    </label>
+  </div>
+</div>
+{% endblock %}
+

@@ -2,12 +2,22 @@
 
 {% block content %}
 
-<div>
-    <h1class="text-4xl text-success mb-4">Invoice Manager</h1>
-    
+
+
+<body>
+    {% if user.is_authenticated %}
+      <p>You can see completed invoices here.</p>
+    {% else %}
+      <p>Please login to see this page.</p>
+    {% endif %}
 
 
 
-</div>
+
+
+</body>
+
+
+
 
 {% endblock %}
