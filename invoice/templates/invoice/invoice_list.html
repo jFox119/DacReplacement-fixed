@@ -1,0 +1,39 @@
+{% if invoices %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Invoice #</th>
+        <th>Client</th>
+        <th>Premium</th>
+        <th>Invoice Date</th>
+      </tr>
+    </thead>
+    <tbody id="invoice-table-body">
+      {% for invoice in invoices %}
+        <tr>
+          <td>{{invoice.id}}</td>
+          <td>{{invoice.Client_ID}}</td>
+          <td>{{invoice.LU_Premium_ID}}</td>
+          <td>{{invoice.date}}</td>
+          <td>
+            <button 
+              hx-get="{{ invoice.get_absolute_url }}"
+              hx-target="#inner_invoice_modal"
+              hx-trigger="click"
+              hx-on:click="invoice_modal.showModal()"
+              class="btn btn-success" >
+              Edit
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <dialog id="invoice_modal" class="modal">
+    <div class="modal-box" id="inner_invoice_modal">
+    </div>
+  </dialog>
+
+{% else %}
+  <p>There are no invoices in the system.</p>
+{% endif %}

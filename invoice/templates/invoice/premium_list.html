@@ -1,0 +1,44 @@
+{% if premiums %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Client Name</th>
+        <th>Premium</th>
+        <th>Status</th>
+        <th>Effective Date</th>
+        <th>Expiration Date</th>
+        <th>Dollar Amount</th>
+      </tr>
+    </thead>
+    <tbody id="premium-table-body">
+      {% for premium in premiums %}
+        <tr>
+          <td>{{premium.Client_ID}}</td>
+          <td>{{premium.LU_Premium_ID}}</td>
+          <td>{{premium.LU_Status_ID}}</td>
+          <td>{{premium.effective_date}}</td>
+          <td>{{premium.expiration_date}}</td>
+          <td>{{premium.dollar_amount}}</td>
+          <td>
+            <button 
+              hx-get="{{ premium.get_absolute_url }}"
+              hx-target="#inner_premium_modal"
+              hx-trigger="click"
+              hx-on:click="premium_modal.showModal()"
+              class="btn btn-success" >
+              Edit
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <input type="checkbox" id="my_modal_toggle" class="modal-toggle" />
+  <dialog id="premium_modal" class="modal">
+    <div class="modal-box" id="inner_premium_modal">
+    </div>
+  </dialog>
+
+{% else %}
+  <p>There are no premiums in the system.</p>
+{% endif %}

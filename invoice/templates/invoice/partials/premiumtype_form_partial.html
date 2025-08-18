@@ -1,0 +1,14 @@
+    <!-- your_app/partials/premiumtype_form_partial.html -->
+    <form hx-post="{% url 'invoice:premiumtype_edit' premiumtype.id %}"
+          hx-target="#inner_premiumtype_modal"
+          hx-swap="innerHTML"
+          hx-on::after-request="if (event.detail.successful) document.getElementById('my_modal_toggle').checked = false;">
+        {% csrf_token %}
+        <table>
+            {{ form.as_table }}
+        </table>
+        <div class="modal-action">
+          <button type="button" class="btn" onclick="premiumtype_modal.close()">Close</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
