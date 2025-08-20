@@ -1,14 +1,14 @@
 from django.views.generic import View
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Client, ClientIdentification, Premium, PremiumType, StatusType, Invoices
+from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice
 
 from django.contrib.auth.decorators import login_required
 from django.views import generic
 from django.views.generic.edit import FormMixin
 
 from django.views.decorators.http import require_http_methods
-from invoice.forms import ClientForm, PremiumForm, PremiumTypeForm, InvoiceForm
+from invoice.forms import ClientForm, ClientPremiumForm, PremiumForm, InvoiceForm
 from django.shortcuts import get_object_or_404
 
 from django.urls import reverse_lazy
@@ -27,7 +27,7 @@ from io import BytesIO
 
 #@login_required
 def index(request):
-    return render(request, 'invoice.html')
+    return render(request, 'invoices.html')
 
 class adminCheckView(View):
     def get(self, request, *args, **kwargs):
@@ -36,23 +36,35 @@ class adminCheckView(View):
         else:
             return HttpResponse("You are not a superuser.")
 
-def invoice(request):
-    invoices = Invoices.objects.all()
+def invoices(request):
+    #invoices = Invoice.objects.all()
+    invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').all()
     form = InvoiceForm()
     context = {
         'invoices': invoices,
         'form': form,
     }
-    return render(request, 'invoice.html', context)
+    return render(request, 'invoices.html', context)
 
 
 class InvoiceListView(generic.ListView):
-    model = Invoices
+    model = Invoice
     paginate_by = 2
+
+    def client_name(self, obj):
+        if obj.client_premium and obj.client_premium.client:
+            return f"{obj.client_premium.client.first_name} {obj.client_premium.client.last_name}"
+        else:
+            return "N/A"  # Or some other suitable default value
+    def premium_name(self, obj):
+        if obj.client_premium and obj.client_premium.premium:
+            return f"{obj.client_premium.premium.name}"
+        else:
+            return "N/A"  # Or some other suitable default value
 
 
 class InvoiceDetailView(generic.DetailView):
-    model = Invoices
+    model = Invoice
     template_name = 'invoice/partials/invoice_form_partial.html' # Render only the form
 
     def get_context_data(self, **kwargs):
@@ -62,10 +74,10 @@ class InvoiceDetailView(generic.DetailView):
 
 
 class InvoiceUpdateView(generic.UpdateView):
-    model = Invoices
+    model = Invoice
     form_class = InvoiceForm
     template_name = 'invoice/partials/invoice_form_partial.html'
-    success_url = reverse_lazy('invoice:invoice')  # Or use get_success_url()
+    success_url = reverse_lazy('invoice:invoices')  # Or use get_success_url()
 
     def form_valid(self, form):
         # Process the form data (e.g., save to database)
@@ -130,6 +142,48 @@ class ClientUpdateView(generic.UpdateView):
             return super().form_valid(form)
 
 #   Premiums
+def clientpremiums(request):
+    premiums = ClientPremium.objects.all()
+    form = ClientPremiumForm()
+    context = {
+        'premiums': premiums,
+        'form': form,
+    }
+    return render(request, 'clientpremiums.html', context)
+
+
+class ClientPremiumListView(generic.ListView):
+    model = ClientPremium
+    paginate_by = 2
+
+
+class ClientPremiumDetailView(generic.DetailView):
+    model = ClientPremium
+    template_name = 'invoice/partials/clientpremium_form_partial.html' # Render only the form
+
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['form'] = PremiumForm(instance=self.object)
+            return context
+
+
+class ClientPremiumUpdateView(generic.UpdateView):
+    model = ClientPremium
+    form_class = ClientPremiumForm
+    template_name = 'invoice/partials/clientpremium_form_partial.html'
+    success_url = reverse_lazy('invoice:clientpremiums')  # Or use get_success_url()
+
+    def form_valid(self, form):
+        # Process the form data (e.g., save to database)
+        form.save()
+
+        # Check if it's an HTMX request
+        if self.request.headers.get('HX-Request'):
+            return HttpResponseClientRefresh()
+        else:
+            return super().form_valid(form)
+
+#   Premium Types
 def premiums(request):
     premiums = Premium.objects.all()
     form = PremiumForm()
@@ -171,48 +225,6 @@ class PremiumUpdateView(generic.UpdateView):
         else:
             return super().form_valid(form)
 
-#   Premium Types
-def premiumtypes(request):
-    premiumtypes = PremiumType.objects.all()
-    form = PremiumTypeForm()
-    context = {
-        'premiumtypes': premiumtypes,
-        'form': form,
-    }
-    return render(request, 'premiumtypes.html', context)
-
-
-class PremiumTypeListView(generic.ListView):
-    model = PremiumType
-    paginate_by = 2
-
-
-class PremiumTypeDetailView(generic.DetailView):
-    model = PremiumType
-    template_name = 'invoice/partials/premiumtype_form_partial.html' # Render only the form
-
-    def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            context['form'] = PremiumTypeForm(instance=self.object)
-            return context
-
-
-class PremiumTypeUpdateView(generic.UpdateView):
-    model = PremiumType
-    form_class = PremiumTypeForm
-    template_name = 'invoice/partials/premiumtype_form_partial.html'
-    success_url = reverse_lazy('invoice:premiumtypes')  # Or use get_success_url()
-
-    def form_valid(self, form):
-        # Process the form data (e.g., save to database)
-        form.save()
-
-        # Check if it's an HTMX request
-        if self.request.headers.get('HX-Request'):
-            return HttpResponseClientRefresh()
-        else:
-            return super().form_valid(form)
-
 
 
 
@@ -222,26 +234,28 @@ from reportlab.lib.units import inch, mm
 from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib import colors
 
+from django.shortcuts import get_object_or_404
+
 
 def generate_pdf_report(request, pk):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
 
     # database data
-    client = Client.objects.get(pk = pk)
+    #   Using select_related to efficiently retrieve related objects
+    #invoiceData = Invoice.objects.filter(pk = pk).first()
+    #clientprem = ClientPremium.objects.filter(id = invoiceData.client_premium_id ).first()
+    #client = Client.objects.filter(id = clientprem.client.id).first()
+    #queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client__id = clientprem.client.id)
 
-    all_invoices_by_client = Invoices.objects.filter(Premium_ID__Client_ID__first_name="Tyson").values()
-    clientInvoices = Invoices.objects.select_related('Premium_ID__Client_ID')
-    #print(clientInvoices.values())
-    #obj = clientInvoices.first()
+    invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client'), pk=pk)
+    client = invoiceData.client_premium.client
+    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
 
-    allInvoices = Invoices.objects.all()
-    print(allInvoices.values())
-    for inv in allInvoices:
-        print(inv.premium_set.all())
-
+    #  Iterate through the results to access the desired fields
+    #for invoice in invoiceDate:
+    #   print(f"Invoice ID: {invoice.invoice_id}, Premium Name: {invoice.client_premium.premium.name}, Client Name: {invoice.client_premium.client.first_name}, Date: {invoice.date}")
     
-
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5 * inch, leftMargin= .5 * inch)
     style = getSampleStyleSheet()
@@ -272,20 +286,11 @@ def generate_pdf_report(request, pk):
         [Paragraph("Cedar Bluff, VA 24609", headerStyle)]
 
     ]
+    subtotal = invoiceData.unit * invoiceData.client_premium.dollar_amount
+    queryData = [['Description', 'Quantity', 'Amount', 'Total Due']]
+    for obj in queryset:
+        queryData.append([obj.client_premium.premium.name, obj.unit, obj.client_premium.dollar_amount, subtotal])
 
-    subtotal = 0.00
-    '''
-    queryset = Invoices.objects.filter(Premium_ID__Client_ID__first_name="Tyson")
-    queryData = [['Description', 'Quantity', 'Amount', 'Total Due']]
-    for obj in queryset:
-        queryData.append([(obj.first_name + " " + obj.last_name), obj.address, obj.city, obj.state])
-        subtotal+= 1
-    '''
-    queryset = Client.objects.all()
-    queryData = [['Description', 'Quantity', 'Amount', 'Total Due']]
-    for obj in queryset:
-        queryData.append([(obj.first_name + " " + obj.last_name), obj.address, obj.city, obj.state])
-        subtotal+= 1
     
     footerData = [
         [Paragraph("Notes/Comments", headerStyle), Paragraph("", centerStyle), Paragraph("Subtotal: " + " $" + f"{subtotal:,.2f}", rightHeaderStyle)],
@@ -295,7 +300,6 @@ def generate_pdf_report(request, pk):
         [Paragraph("", headerStyle),Paragraph("", centerStyle),Paragraph("Total: " + " $" + f"{subtotal:,.2f}", rightHeaderStyle)]
 
     ]
-
 
     colWidths=[5 * inch, 2.0 * inch]
     headerTable = Table(headerData, colWidths=colWidths, rowHeights=5*mm)
@@ -312,14 +316,12 @@ def generate_pdf_report(request, pk):
     colWidths=[2 * inch, 3.25 * inch, 1.75 * inch]
     footerTable = Table(footerData, colWidths=colWidths)
 
-
-
     #   header
     story.append(headerTable)
     story.append(Spacer(1, 0.1 * inch))
     story.append(Paragraph("Phone : (276) 964-4915 Fax : (276) 963-0130", headerStyle))
     story.append(Spacer(1, 0.1 * inch))
-    story.append(Paragraph(("Invoice Date: " +  str(date.today()) + "  Inv No: " + client.first_name), rightHeaderStyle))
+    story.append(Paragraph(("Invoice Date: " +  str(date.today()) + "  Inv No: " + str(invoiceData.invoice_id)), rightHeaderStyle))
     story.append(Spacer(1, 0.1 * inch))
     story.append(Paragraph("Due Date: Monthly", rightHeaderStyle))
     story.append(Spacer(1, 0.3 * inch))
@@ -346,6 +348,7 @@ def generate_pdf_report(request, pk):
     buffer.close()
     response.write(pdf_value)
     return response
+
 
 # REPORT LAB
 def pdfAuthors(request):

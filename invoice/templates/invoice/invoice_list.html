@@ -11,10 +11,10 @@
     <tbody id="invoice-table-body">
       {% for invoice in invoices %}
         <tr>
-          <td>{{invoice.id}}</td>
-          <td>{{invoice.Client_ID}}</td>
-          <td>{{invoice.LU_Premium_ID}}</td>
+          <td>{{invoice.invoice_id}}</td>
+          <td>{{invoice.client_premium}}</td>
           <td>{{invoice.date}}</td>
+          <td><a href="{% url 'invoice:pdfAuthors' invoice.invoice_id %}">pdf</a></td>
           <td>
             <button 
               hx-get="{{ invoice.get_absolute_url }}"

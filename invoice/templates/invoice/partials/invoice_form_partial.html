@@ -1,5 +1,5 @@
   <!-- your_app/partials/invoice_form_partial.html -->
-    <form hx-post="{% url 'invoice:invoice_edit' invoice.id %}"
+    <form hx-post="{% url 'invoice:invoice_edit' invoice.invoice_id %}"
           hx-target="#inner_invoice_modal"
           hx-swap="innerHTML">
         {% csrf_token %}

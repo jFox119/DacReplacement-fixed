@@ -1,35 +1,16 @@
 from django import forms
-from .models import Client, ClientIdentification, Premium, PremiumType, StatusType, Invoices
+from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice
 from django.core.exceptions import ValidationError
 
 
 
 
-#   PInvoice
+#   Invoice
 class InvoiceForm(forms.ModelForm):
     class Meta:
-        model = Invoices
-        fields = ['id', 'Client_ID', 'Premium_ID', 'unit', 'date', 'optional']
+        model = Invoice
+        fields = ['invoice_id', 'client_premium', 'unit', 'date', 'optional']
 
-    name =forms.CharField()
-
-    Client_ID =forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-        })
-    )
-    def __init__(self, *args, **kwargs):
-        super(InvoiceForm, self).__init__(*args, **kwargs)
-        self.fields['Client_ID']=forms.ModelChoiceField(queryset=Client.objects.all())
-
-    Premium_ID =forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'input input-bordered w-full',
-        })
-    )
-    def __init__(self, *args, **kwargs):
-        super(InvoiceForm, self).__init__(*args, **kwargs)
-        self.fields['Premium_ID']=forms.ModelChoiceField(queryset=Premium.objects.all())
 
     unit =forms.CharField(
         widget=forms.TextInput(attrs={
@@ -38,7 +19,6 @@ class InvoiceForm(forms.ModelForm):
         })
     )
     date =forms.DateField(
-        help_text="Due Date for Invoice",
         widget=forms.DateInput(attrs={
             'class': 'input input-bordered w-full',
         })
@@ -92,10 +72,10 @@ class ClientForm(forms.ModelForm):
 
 
 #   Premiums
-class PremiumForm(forms.ModelForm):
+class ClientPremiumForm(forms.ModelForm):
     class Meta:
-        model = Premium
-        fields = ['Client_ID','LU_Premium_ID', 'LU_Status_ID', 'effective_date', 'expiration_date', 'dollar_amount']
+        model = ClientPremium
+        fields = ['client','premium', 'LU_Status_ID', 'effective_date', 'expiration_date', 'dollar_amount']
 
     Client_ID =forms.CharField(
         widget=forms.TextInput(attrs={
@@ -103,7 +83,7 @@ class PremiumForm(forms.ModelForm):
         })
     )
     def __init__(self, *args, **kwargs):
-        super(PremiumForm, self).__init__(*args, **kwargs)
+        super(ClientPremiumForm, self).__init__(*args, **kwargs)
         self.fields['Client_ID']=forms.ModelChoiceField(queryset=Client.objects.all())
 
     LU_Premium_ID =forms.CharField(
@@ -112,8 +92,8 @@ class PremiumForm(forms.ModelForm):
         })
     )
     def __init__(self, *args, **kwargs):
-        super(PremiumForm, self).__init__(*args, **kwargs)
-        self.fields['LU_Premium_ID']=forms.ModelChoiceField(queryset=PremiumType.objects.all())
+        super(ClientPremiumForm, self).__init__(*args, **kwargs)
+        self.fields['LU_Premium_ID']=forms.ModelChoiceField(queryset=Premium.objects.all())
 
     LU_Status_ID =forms.CharField(
 
@@ -122,7 +102,7 @@ class PremiumForm(forms.ModelForm):
         })
     )
     def __init__(self, *args, **kwargs):
-        super(PremiumForm, self).__init__(*args, **kwargs)
+        super(ClientPremiumForm, self).__init__(*args, **kwargs)
         self.fields['LU_Status_ID']=forms.ModelChoiceField(queryset=StatusType.objects.all())
 
     effective_date =forms.DateField(
@@ -147,9 +127,9 @@ class PremiumForm(forms.ModelForm):
 
 
 #   Premium Type
-class PremiumTypeForm(forms.ModelForm):
+class PremiumForm(forms.ModelForm):
     class Meta:
-        model = PremiumType
+        model = Premium
         fields = ['name']
 
     name =forms.CharField(
