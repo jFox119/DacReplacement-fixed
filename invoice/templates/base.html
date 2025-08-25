@@ -21,7 +21,14 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
             </label>
-            <a class="btn btn-ghost text-xl normal-case text-success" href="/">PACE Invoice System</a>
+            {% if user.is_authenticated %}
+                <a class="btn btn-ghost text-xl normal-case text-success" href="/">PACE Invoice System</a>
+            {% else %}
+                <form id="login-form"  action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-ghost text-xl normal-case text-success">PACE Invoice System</button>
+                </form>
+            {% endif %}
         </div>
         <div class="navbar-center"></div>
 
@@ -35,7 +42,7 @@
                 <button type="submit" class="btn btn-link text-success">Admin</button>
             </a>
             {% endif %}
-            <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+            <form id="logout-form" method="post" action="{% url 'logout' %}">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-link text-success">Logout</button>
             </form>

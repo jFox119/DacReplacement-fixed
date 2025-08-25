@@ -5,6 +5,8 @@ from . import views
 app_name = "invoice"
 urlpatterns = [
     path("", views.index, name="index"),
+    path('logout/', views.logoutView, name='logout'),
+
     path('invoices/', views.invoices, name='invoices'),
     path('invoices/invoice_list', views.InvoiceListView.as_view(), name='invoice_list'),
     path("invoices/<int:pk>", views.InvoiceDetailView.as_view(), name='invoice_detail'),

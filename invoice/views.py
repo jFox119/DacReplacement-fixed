@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.views import generic
 from django.views.generic.edit import FormMixin
 
@@ -11,7 +12,7 @@ from django.views.decorators.http import require_http_methods
 from invoice.forms import ClientForm, ClientPremiumForm, PremiumForm, InvoiceForm
 from django.shortcuts import get_object_or_404
 
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
 from django_htmx.http import HttpResponseClientRefresh
 
@@ -27,7 +28,7 @@ from io import BytesIO
 
 #@login_required
 def index(request):
-    return render(request, 'invoices.html')
+    return render(request, 'index.html')
 
 class adminCheckView(View):
     def get(self, request, *args, **kwargs):
@@ -35,6 +36,10 @@ class adminCheckView(View):
             return HttpResponse("Welcome, Superuser!")
         else:
             return HttpResponse("You are not a superuser.")
+        
+def logoutView(request):
+    logout(request)
+    return redirect(reverse('logged_out'))
 
 def invoices(request):
     #invoices = Invoice.objects.all()
