@@ -2,20 +2,21 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.urls import reverse  # To generate URLS by reversing URL patterns
+from simple_history.models import HistoricalRecords
 
 
 # Create your models here.
-
-
 class Client(models.Model):
 
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
+    #dacNumber = models.IntegerField()
     address = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     zip = models.CharField(max_length=5)
+    history = HistoricalRecords()
     
     class Meta:
         ordering = ['last_name', 'first_name']
@@ -28,10 +29,9 @@ class Client(models.Model):
         """Returns the url to access a particular client record."""
         return reverse("invoice:client_detail", kwargs={"pk": self.pk})
     
-    
-
 class IdentificationType(models.Model):
     name = models.CharField(max_length=100)
+
 
     class Meta:
         db_table = "LU_Identification"
@@ -61,6 +61,22 @@ class StatusType(models.Model):
     #    """Returns the url to access a particular client record."""
     #    return reverse("invoice:client_detail", kwargs={"pk": self.pk})
 
+class DueDateType(models.Model):
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = "LU_DueDate"
+        verbose_name = 'Due Date Type'
+        verbose_name_plural = 'Due Date Types'
+    
+    def __str__(self):
+        """String for representing the Model object."""
+        return f'{self.name}' 
+    
+    #def get_absolute_url(self):
+    #    """Returns the url to access a particular client record."""
+    #    return reverse("invoice:client_detail", kwargs={"pk": self.pk})
+
 class ClientIdentification(models.Model):
     Client_ID = models.ForeignKey(Client, on_delete=models.PROTECT)
     LU_Identification_ID = models.ForeignKey(IdentificationType, on_delete=models.PROTECT, verbose_name="Identification Name")
@@ -68,6 +84,7 @@ class ClientIdentification(models.Model):
     LU_Status_ID = models.ForeignKey(StatusType, on_delete=models.PROTECT, verbose_name="Status")
     effective_date = models.DateField(null=True, blank=True)
     expiration_date = models.DateField(null=True, blank=True)
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "Client_Identification"
@@ -109,7 +126,7 @@ class Premium(models.Model):
         return f'{self.name}' 
     
     #def get_absolute_url(self):
-    #    """Returns the url to access a particular client record."""
+    #    """Returns the url to access a particular premium record."""
     #    return reverse("invoice:premiumtype_detail", kwargs={"pk": self.pk})
 
 class ClientPremium(models.Model):
@@ -121,7 +138,7 @@ class ClientPremium(models.Model):
     effective_date = models.DateField(null=True, blank=True)
     expiration_date = models.DateField(null=True, blank=True)
     dollar_amount = models.FloatField(max_length=20)
-
+    history = HistoricalRecords()
 
 
     def __str__(self):
@@ -143,6 +160,7 @@ class Invoice(models.Model):
     unit = models.IntegerField()
     #date = models.DateField(null=True, blank=True)
     optional = models.CharField(max_length=200)
+    history = HistoricalRecords()
 
     class Meta:
         db_table = "Invoices"

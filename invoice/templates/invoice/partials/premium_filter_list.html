@@ -1,0 +1,27 @@
+<div id="premium-filter-list">
+  <fieldset class="fieldset bg-base-100 border-base-300 rounded-box w-fit border p-4 ">
+    <legend class="fieldset-legend">Filters</legend>
+      {% if premiums %}
+        {% for premium in premiums %}
+          <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+              <label class="text-success">
+              
+              <input type="checkbox" class="checkbox checkbox-success checkbox-sm "
+                placeholder="Filter"
+                name="filter"
+                hx-post="{% url 'invoice:filter' pk=premium.pk %}"
+                hx-trigger="change"
+                hx-vals="js:{'is_active': this.checked}"
+                hx-target="#invoice-list" 
+                hx-on::before-request="document.getElementById('invoice-list').style.opacity = 0.4;"
+                hx-on::after-request="document.getElementById('invoice-list').style.opacity = 1.0;">
+                
+                {{premium.name}}
+              </label>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>There are no premiums in the system.</p>
+      {% endif %}
+  </fieldset>
+</div>

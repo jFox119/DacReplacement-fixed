@@ -17,6 +17,7 @@ from django.urls import reverse_lazy, reverse
 from django_htmx.http import HttpResponseClientRefresh
 
 from datetime import date
+from django.db.models import Q
 
 # REPORT LAB
 from reportlab.pdfgen import canvas
@@ -41,13 +42,79 @@ def logoutView(request):
     logout(request)
     return redirect(reverse('logged_out'))
 
+def searchTable(request):
+    import time
+    time.sleep(2)
+    search_query = request.GET.get('search', '')
+
+    # Use select_related() to follow the foreign key relationships.
+    # The double underscore syntax (`__`) is used to traverse these relationships.
+    invoices = Invoice.objects.select_related(
+        'client_premium__client', 
+        'client_premium__premium'
+    ).filter(
+        Q(client_premium__client__first_name__icontains=search_query) | 
+        Q(client_premium__client__last_name__icontains=search_query) |
+        Q(client_premium__premium__name__icontains=search_query)
+    )
+
+    #for item in invoices:
+    #    client_first = item.client_premium.client.first_name
+    #    prem = item.client_premium.premium.name
+    #    print("c:", client_first, "--  p: ", prem)
+    return render(request, 'invoice/invoice_list.html', {'invoices': invoices})
+
+def filterTable(request, pk):
+    import time
+    time.sleep(1)
+    print(request)
+    if request.method == 'POST':
+        if 'filter' in request.POST:
+            is_active = 'filter' in request.POST
+            print(is_active)
+            if is_active:
+                filter_query = get_object_or_404(Premium.objects.select_related(), pk=pk)
+                #filter_query = request.GET.get('filter', '')
+
+                # Use select_related() to follow the foreign key relationships.
+                # The double underscore syntax (`__`) is used to traverse these relationships.
+                invoices = Invoice.objects.select_related(
+                    'client_premium__client', 
+                    'client_premium__premium'
+                ).filter(
+                    Q(client_premium__client__first_name__icontains=filter_query) | 
+                    Q(client_premium__client__last_name__icontains=filter_query) |
+                    Q(client_premium__premium__name__icontains=filter_query)
+                )
+                #for item in invoices:
+                #    client_first = item.client_premium.client.first_name
+                #    prem = item.client_premium.premium.name
+                #    print("c:", client_first, "--  p: ", prem)
+                return render(request, 'invoice/invoice_list.html', {'invoices': invoices})
+        else:
+            invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').all()
+            form = InvoiceForm()
+            premiums = Premium.objects.all()
+            context = {
+                'invoices': invoices,
+                'form': form,
+                'premiums': premiums,
+            }
+            return render(request, 'invoice/invoice_list.html', context)
+
+
+
+
+
 def invoices(request):
     #invoices = Invoice.objects.all()
     invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').all()
     form = InvoiceForm()
+    premiums = Premium.objects.all()
     context = {
         'invoices': invoices,
         'form': form,
+        'premiums': premiums,
     }
     return render(request, 'invoices.html', context)
 
@@ -242,7 +309,7 @@ from reportlab.lib import colors
 from django.shortcuts import get_object_or_404
 
 
-def generate_pdf_report(request, pk):
+def generate_pdf_report(request,pk):
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
 
@@ -255,7 +322,8 @@ def generate_pdf_report(request, pk):
 
     invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client'), pk=pk)
     client = invoiceData.client_premium.client
-    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
+    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(pk=pk)
+    #queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
 
     #  Iterate through the results to access the desired fields
     #for invoice in invoiceDate:

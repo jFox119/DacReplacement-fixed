@@ -6,6 +6,8 @@ app_name = "invoice"
 urlpatterns = [
     path("", views.index, name="index"),
     path('logout/', views.logoutView, name='logout'),
+    path('search/', views.searchTable, name='search'),
+    path('filter/<int:pk>', views.filterTable, name='filter'),
 
     path('invoices/', views.invoices, name='invoices'),
     path('invoices/invoice_list', views.InvoiceListView.as_view(), name='invoice_list'),
@@ -27,7 +29,7 @@ urlpatterns = [
     path("premiums/<int:pk>", views.PremiumDetailView.as_view(), name='premium_detail'),
     path('premiums/<int:pk>/edit/', views.PremiumUpdateView.as_view(), name='premium_edit'),
 
-    path("pdf/<int:pk>", views.generate_pdf_report, name="pdfAuthors"),
+    path("pdf/<int:pk>", views.generate_pdf_report, name="pdfInvoice"),
 
 
     #path("clients/edit/<int:pk>", views.ClientEditView.as_view(), name="client_edit"),

@@ -39,7 +39,7 @@
             </a>
             {% if user.is_superuser or  user.is_staff %}
             <a href="{% url 'admin:index' %}">
-                <button type="submit" class="btn btn-link text-success">Admin</button>
+                <button type="submit" class="btn btn-link text-success">Data Entry</button>
             </a>
             {% endif %}
             <form id="logout-form" method="post" action="{% url 'logout' %}">

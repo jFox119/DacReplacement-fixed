@@ -7,12 +7,11 @@
   <div class="drawer-content p-4">
     <!-- Page content here -->
     {% if user.is_authenticated %}
-      <h1 class="text-2xl underline text-accent">Invoice List</h1>
+      <h1 class="text-2xl underline text-success">Invoice List</h1>
       <div class="p-4 text-white">
         <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
           
           {% include 'invoice/invoice_list.html'%}
-          
         </div>
       </div>
     {% else %}
@@ -21,23 +20,48 @@
   </div> 
   <div class="drawer-side menu p-4 min-h-full bg-base-200 text-base-content">
     <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-    <label class="input input-bordered flex items-center gap-2">
-      <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <g
-          stroke-linejoin="round"
-          stroke-linecap="round"
-          stroke-width="2.5"
-          fill="none"
-          stroke="currentColor"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.3-4.3"></path>
-        </g>
-      </svg>
-      <input type="search" class="grow" placeholder="Search" />
-    </label>
+    <table>
+      <tr>
+        <label class="input input-bordered flex items-center gap-2">
+          <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <g
+              stroke-linejoin="round"
+              stroke-linecap="round"
+              stroke-width="2.5"
+              fill="none"
+              stroke="currentColor"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </g>
+          </svg>
+          <input 
+            type="search" 
+            class="grow" 
+            placeholder="Search"
+            name="search"
+            hx-get="{% url 'invoice:search' %}"
+            hx-trigger="keyup delay:500ms"
+            hx-target="#invoice-list" 
+            hx-on::before-request="document.getElementById('invoice-list').style.opacity = 0.4;"
+            hx-on::after-request="document.getElementById('invoice-list').style.opacity = 1.0;">
+          </input>
+        </label>
+      </tr>
+      <tr>
+        <div class="divider"></div>
+      </tr>
+      <tr>
+        {% include 'invoice/partials/premium_filter_list.html'%}
+      </tr>
+      <tr>
+        <a href="{% url 'invoice:invoices' %}">
+            <button type="submit" class="btn btn-sm btn-success">Clear</button>
+        </a>
+      </tr>
+    </table>
   </div>
 </div>
-
+  
 {% endblock %}
 
