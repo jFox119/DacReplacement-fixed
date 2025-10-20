@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "invoice.apps.InvoiceConfig",
     "django_htmx",
     "simple_history",
+    'django.contrib.humanize',
 
     
 ]

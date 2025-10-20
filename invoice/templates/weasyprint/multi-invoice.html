@@ -30,13 +30,14 @@
 
         <dl id="informations">
             <dt>Invoice number</dt>
-            <dd>{{invoice.invoice_id}}</dd>
+            <dd>{{invMinID.invoice_id}} - {{invMaxID.invoice_id}}</dd>
         </dl>
         </div>
         <div>
             <table>
                 <thead>
                     <tr>
+                    <th>Inv No.</th>
                     <th>Description</th>
                     <th>Quantity</th>
                     <th>Amount</th>
@@ -47,9 +48,10 @@
                 {% if queryset %}
                     {% for item in queryset %}
                     <tr>
+                    <td>{{item.invoice_id}}</td>
                     <td>{{item.client_premium.premium.name}}</td>
                     <td>{{item.unit}}</td>
-                    <td>{{item.client_premium.dollar_amount|currency}}</td>
+                    <td>{{item.client_premium.dollar_amount|currency }}</td>
                     <td>{{item.unit|multiply:item.client_premium.dollar_amount|currency }}</td>
                     </tr>
                     {% endfor %}

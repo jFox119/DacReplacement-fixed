@@ -320,22 +320,30 @@ from weasyprint import HTML, CSS
 from django.template.loader import render_to_string
 
 def pdfMultipleInvoices(request,pk):
-    invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client'), pk=pk)
+    invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client', 'duedate'), pk=pk)
     client = invoiceData.client_premium.client
     #queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(pk=pk)
-    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
+    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium', 'duedate').filter(client_premium__client=client).order_by('invoice_id')
+    
     itemtotal = 0
     total = 0
     for obj in queryset:
         itemtotal = (obj.unit * obj.client_premium.dollar_amount)
         total += itemtotal
- 
-    html_string = render_to_string('weasyprint/invoice.html', 
+    
+    invMinID = queryset.first()
+    invMaxID = queryset.last()
+    print(invoiceData.duedate.name)
+
+
+    html_string = render_to_string('weasyprint/multi-invoice.html', 
                                    {
                                        'invoice': invoiceData, 
                                         'client': client, 
                                         'queryset': queryset, 
-                                        'total': total
+                                        'total': total,
+                                        'invMinID': invMinID,
+                                        'invMaxID': invMaxID,
                                     }
     )
     #html_string = render_to_string('weasyprint/single_profile_pdf.html', {'client': client})
@@ -464,10 +472,10 @@ def pdfMultipleInvoices(request,pk):
 '''
 
 def pdfSingleInvoice(request,pk):
-    invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client'), pk=pk)
+    invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client', 'duedate'), pk=pk)
     client = invoiceData.client_premium.client
     # Specific Invoice Record
-    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(pk=pk)
+    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium', 'duedate').filter(pk=pk)
     # All invoices belinging to a client
     #queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
     itemtotal = 0
