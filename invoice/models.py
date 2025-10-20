@@ -158,7 +158,7 @@ class Invoice(models.Model):
     unit = models.IntegerField()
     optional = models.CharField(max_length=200, null=True, blank=True)
     duedate = models.ForeignKey(DueDateType, on_delete=models.CASCADE)
-    is_paid = models.BooleanField(null=True, blank=True)
+    is_paid = models.BooleanField(null=True, blank=True, default=False)
     paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     paid_date = models.DateField(null=True, blank=True)
     history = HistoricalRecords()

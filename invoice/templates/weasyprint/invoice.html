@@ -38,6 +38,7 @@
                 <thead>
                     <tr>
                     <th>Description</th>
+                    
                     <th>Quantity</th>
                     <th>Amount</th>
                     <th>Total</th>
@@ -48,6 +49,7 @@
                     {% for item in queryset %}
                     <tr>
                     <td>{{item.client_premium.premium.name}}</td>
+                    
                     <td>{{item.unit}}</td>
                     <td>{{item.client_premium.dollar_amount|currency}}</td>
                     <td>{{item.unit|multiply:item.client_premium.dollar_amount|currency }}</td>
