@@ -1,0 +1,40 @@
+<!-- partials/table_modal_content.html -->
+
+<h>{{ client.first_name}} {{client.last_name}}</h>
+<div class="modal-body overflow-y-auto ">
+    <div class="p-4 text-white " >
+        <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 table-sm h-80">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Invoice No.</th>
+                        <th>Premium</th>
+                        <th>Date</th>
+                        <!-- Add more columns as needed -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in queryset %}
+                    <tr class="hover:bg-base-300">
+                        <td>{{ item.invoice_id }}</td>
+                        <td>{{ item.client_premium.premium.name}}</td>
+                        <td>{{ item.date }}</td>
+                        <td>
+                            <a class="btn btn-success" 
+                                href="{% url 'invoice:pdfSingleInvoice' item.invoice_id %}" target="_blank">
+                                pdf
+                            </a>
+                        </td>
+                        <!-- Add more fields as needed -->
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+        </div>
+    </div>
+    <div class="modal-action">
+        <button type="button" class="btn" onclick="client_invoice_modal.close()">Close</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</div>

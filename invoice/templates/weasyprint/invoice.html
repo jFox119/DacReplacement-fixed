@@ -1,0 +1,87 @@
+{% load math_filters %}
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link href="weasyprint/invoice.css" media="print" rel="stylesheet">
+        <title>Invoice</title>
+    </head>
+
+    
+    <body>
+        <div class="a">
+        
+        <h1>Appalahian Agency for Senior Citizens</h1>
+        <h1>P.O. Box 765</h1>
+        <h1>Cedar Bluff, VA 24609</h1>
+        <h1>Phone : (276) 964-4915 Fax : (276) 963-0130</h1>
+        <aside>
+            <address id="from" >
+                {{client.first_name}} {{client.last_name}}
+                {{client.address}}
+                {{client.city}}, {{client.state}} {{client.zip}}
+            </address>
+
+            <address id="to" text-align="right">
+                Invoice Date: {{invoice.date}} 
+                Due Date: {{inovice.duedate}}
+            </address>
+        </aside>
+
+        <dl id="informations">
+            <dt>Invoice number</dt>
+            <dd>{{invoice.invoice_id}}</dd>
+        </dl>
+        </div>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
+                    <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% if queryset %}
+                    {% for item in queryset %}
+                    <tr>
+                    <td>{{item.client_premium.premium.name}}</td>
+                    <td>{{item.unit}}</td>
+                    <td>{{item.client_premium.dollar_amount}}</td>
+                    <td>{{item.unit|multiply:item.client_premium.dollar_amount }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <table id="total">
+                <thead>
+                <tr>
+                    <th>Notes/Comments</th>
+                    <th>Total due</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        {% if invoice.optional %}
+                        <p1>{{invoice.optional}}</p1>
+                        {% endif %}
+                        <br>
+                        <p>THANK YOU</p>
+                        <p>PLEASE MAKE CHECKS PAYABLE TO</p>
+                        <p>APPALACHIAN AGENCY FOR SENIOR CITIZENS</p>
+                    </td>
+                    
+                    <td>{{total}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </footer>
+    </body>
+</html>

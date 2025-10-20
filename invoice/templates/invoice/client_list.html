@@ -2,18 +2,18 @@
   <table class="table">
     <thead>
       <tr>
-        <th>First Name</th>
-        <th>Last Name</th>
+        <th>ID</th>
+        <th>Name</th>
         <th>Address</th>
       </tr>
     </thead>
     <tbody id="client-table-body">
       {% for client in clients %}
         <tr>
-          <td>{{client.first_name}}</td>
-          <td>{{client.last_name}}</td>
+          <td>{{client.id}}</td>
+          <td>{{client.first_name}} {{client.last_name}}</td>
           <td>{{client.address}}</td>
-          <td>
+          <!--<td>
             <button 
               hx-get="{{ client.get_absolute_url }}"
               hx-target="#inner_client_modal"
@@ -22,8 +22,22 @@
               class="btn btn-success" >
               Edit
             </button>
+          </td>-->
+          <td>
+            <button hx-get="{% url 'invoice:load_Client_Invoices' client.id%}"
+                    hx-target="#inner_client_invoice_modal"
+                    hx-trigger="click"
+                    hx-on:click="client_invoice_modal.showModal()"
+                    class="btn btn-success" >
+                      All Client Statements
+              </button>
           </td>
-          <td><a href="{% url 'invoice:pdfAuthors' client.id %}">pdf</a></td>
+          <td>
+            <a class="btn btn-success" 
+              href="{% url 'invoice:pdfMultipleInvoices' client.id %}">
+                Full Statement
+            </a>
+          </td>
         </tr>
       {% endfor %}
     </tbody>
@@ -33,6 +47,13 @@
     <div class="modal-box" id="inner_client_modal">
     </div>
   </dialog>
+
+  <input type="checkbox" id="my_CI_modal_toggle" class="modal-toggle" />
+  <dialog id="client_invoice_modal" class="modal">
+    <div class="modal-box max-w-2xl" id="inner_client_invoice_modal">
+    </div>
+  </dialog>
+  
 
 {% else %}
   <p>There are no clients in the system.</p>

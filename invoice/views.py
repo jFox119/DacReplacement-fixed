@@ -67,11 +67,11 @@ def searchTable(request):
 def filterTable(request, pk):
     import time
     time.sleep(1)
-    print(request)
+    #print(request)
     if request.method == 'POST':
         if 'filter' in request.POST:
             is_active = 'filter' in request.POST
-            print(is_active)
+            #print(is_active)
             if is_active:
                 filter_query = get_object_or_404(Premium.objects.select_related(), pk=pk)
                 #filter_query = request.GET.get('filter', '')
@@ -101,7 +101,6 @@ def filterTable(request, pk):
                 'premiums': premiums,
             }
             return render(request, 'invoice/invoice_list.html', context)
-
 
 
 
@@ -297,6 +296,16 @@ class PremiumUpdateView(generic.UpdateView):
         else:
             return super().form_valid(form)
 
+#def load_Client_Invoices(request):
+def load_Client_Invoices(request, pk):
+    client = Client.objects.get(pk=pk)
+    #client = Client.objects.get(pk=1)
+    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
+    
+    context = {'queryset' : queryset, 'client': client}
+    for item in queryset:
+        print(item.client_premium)
+    return render(request, 'invoice/partials/table_invoice_modal.html', context)
 
 
 
@@ -307,9 +316,38 @@ from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib import colors
 
 from django.shortcuts import get_object_or_404
+from weasyprint import HTML, CSS
+from django.template.loader import render_to_string
+
+def pdfMultipleInvoices(request,pk):
+    invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client'), pk=pk)
+    client = invoiceData.client_premium.client
+    #queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(pk=pk)
+    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
+    itemtotal = 0
+    total = 0
+    for obj in queryset:
+        itemtotal = (obj.unit * obj.client_premium.dollar_amount)
+        total += itemtotal
+ 
+    html_string = render_to_string('weasyprint/invoice.html', 
+                                   {
+                                       'invoice': invoiceData, 
+                                        'client': client, 
+                                        'queryset': queryset, 
+                                        'total': total
+                                    }
+    )
+    #html_string = render_to_string('weasyprint/single_profile_pdf.html', {'client': client})
 
 
-def generate_pdf_report(request,pk):
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Dispostition"] = f'inline; filename="{client.first_name}"'
+    #response["Content-Dispostition"] = 'inline; filename="Bob.pdf"'
+
+    HTML(string=html_string).write_pdf(response, stylesheets=['invoice/templates/weasyprint/invoice.css'])
+    return response
+'''
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="report.pdf"'
 
@@ -394,9 +432,11 @@ def generate_pdf_report(request,pk):
     story.append(Spacer(1, 0.1 * inch))
     story.append(Paragraph("Phone : (276) 964-4915 Fax : (276) 963-0130", headerStyle))
     story.append(Spacer(1, 0.1 * inch))
-    story.append(Paragraph(("Invoice Date: " +  str(date.today()) + "  Inv No: " + str(invoiceData.invoice_id)), rightHeaderStyle))
+    story.append(Paragraph(("Invoice Date: " +  str(invoiceData.date.strftime("%m-%d-%Y")) + "  Inv No: " + str(invoiceData.invoice_id)), rightHeaderStyle))
+    #story.append(Paragraph(("Invoice Date: " +  str(date.today()) + "  Inv No: " + str(invoiceData.invoice_id)), rightHeaderStyle))
     story.append(Spacer(1, 0.1 * inch))
-    story.append(Paragraph("Due Date: Monthly", rightHeaderStyle))
+    story.append(Paragraph(("Due Date: " + str(invoiceData.duedate)), rightHeaderStyle))
+    #story.append(Paragraph("Due Date: Monthly", rightHeaderStyle))
     story.append(Spacer(1, 0.3 * inch))
 
     # body
@@ -421,47 +461,38 @@ def generate_pdf_report(request,pk):
     buffer.close()
     response.write(pdf_value)
     return response
+'''
 
+def pdfSingleInvoice(request,pk):
+    invoiceData = get_object_or_404(Invoice.objects.select_related('client_premium__client'), pk=pk)
+    client = invoiceData.client_premium.client
+    # Specific Invoice Record
+    queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(pk=pk)
+    # All invoices belinging to a client
+    #queryset = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client=client)
+    itemtotal = 0
+    total = 0
+    for obj in queryset:
+        itemtotal = (obj.unit * obj.client_premium.dollar_amount)
+        total += itemtotal
+ 
+    html_string = render_to_string('weasyprint/invoice.html', 
+                                   {
+                                       'invoice': invoiceData, 
+                                        'client': client, 
+                                        'queryset': queryset, 
+                                        'total': total
+                                    }
+    )
+    #html_string = render_to_string('weasyprint/single_profile_pdf.html', {'client': client})
 
-# REPORT LAB
-def pdfAuthors(request):
-    #   HTTPResponse is used for creating new files, FileResponse is for serving premade files stored on a disk
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="hello.pdf"'
-    buffer = BytesIO()
-    #   canvas styling
-    p = canvas.Canvas(buffer, pagesize=letter)
-    PAGE_WIDTH, PAGE_HEIGHT = letter      #   Setting page width and height as variables for later use
-    headerSize = 16             #   defining header size and style
-    headerStyle = "Courier"
-    bodySize = 16
-    bodyStyle = "Courier"
-    p.setFont(headerStyle, headerSize)
-    p.setFillColorRGB(0.14, 0.59, 0.74)
-
-    p.drawString(PAGE_WIDTH/12, PAGE_HEIGHT/12, "Appalachian Agency for Senior Citizens")
-    p.drawString(PAGE_WIDTH/10, PAGE_HEIGHT/10, "P.O. Box 765")
-    p.setFont(bodyStyle, bodySize)
-    p.setFillColorRGB(0, 0, 0)
-
-    #data collection
-    clients = Client.objects.all()
-    print(clients)
-    positionY = 700
-    for client in clients:
-        p.drawString(60, positionY, client.first_name + " " + client.last_name)
-        positionY -= 25
     
-    # saving the file
-    p.showPage()
-    p.save()
-    pdf = buffer.getvalue()
-    buffer.close()
-    response.write(pdf)
+    response = HttpResponse(content_type="application/pdf")
+    response["Content-Dispostition"] = f'inline; filename="{invoiceData.invoice_id}.pdf"'
+    
+
+    HTML(string=html_string).write_pdf(response, stylesheets=['invoice/templates/weasyprint/invoice.css'])
     return response
-
-
-
 
 
 '''

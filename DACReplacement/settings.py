@@ -115,18 +115,29 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'America/New_York'
 
+DATE_FORMAT = ( ( 'd-m-Y' ))
+DATE_INPUT_FORMATS = ( ('%d-%m-%Y'),)
+DATETIME_FORMAT = (( 'd-m-Y H:i' ))
+DATETIME_INPUT_FORMATS = (('%d-%m-%Y %H:%i'),)
+
 USE_I18N = True
 
-USE_TZ = True
+USE_L10N = False
+
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "invoice/static/css/",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'
+

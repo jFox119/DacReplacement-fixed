@@ -29,8 +29,12 @@ urlpatterns = [
     path("premiums/<int:pk>", views.PremiumDetailView.as_view(), name='premium_detail'),
     path('premiums/<int:pk>/edit/', views.PremiumUpdateView.as_view(), name='premium_edit'),
 
-    path("pdf/<int:pk>", views.generate_pdf_report, name="pdfInvoice"),
+    path("pdf/<int:pk>", views.pdfMultipleInvoices, name="pdfMultipleInvoices"),
+    path("pdf/statement/<int:pk>", views.pdfSingleInvoice, name="pdfSingleInvoice"),
 
+    path('load_Client_Invoices/<int:pk>', views.load_Client_Invoices, name='load_Client_Invoices'),
+    #path('load_Client_Invoices/', views.load_Client_Invoices, name='load_Client_Invoices'),
+    
 
     #path("clients/edit/<int:pk>", views.ClientEditView.as_view(), name="client_edit"),
     

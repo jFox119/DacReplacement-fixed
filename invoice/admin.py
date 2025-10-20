@@ -1,10 +1,11 @@
 from django.contrib import admin
-from invoice.models import  Client, IdentificationType, StatusType, ClientIdentification, ITEMCHANGES, ClientPremium, Premium, Invoice
+from invoice.models import  Client, IdentificationType, StatusType, DueDateType,ClientIdentification, ITEMCHANGES, ClientPremium, Premium, Invoice
 
 # Register your models here.
 admin.site.register(ITEMCHANGES)
 admin.site.register(Client)
 admin.site.register(StatusType)
+admin.site.register(DueDateType)
 admin.site.register(IdentificationType)
 #admin.site.register(ClientIdentification)
 
@@ -18,6 +19,11 @@ class StatusTypeAdmin(admin.TabularInline):
     model = StatusType
     extra = 0
 #admin.site.register(StatusType, StatusTypeAdmin)
+
+class DueDateTypeAdmin(admin.TabularInline):
+    model = DueDateType
+    extra = 0
+#admin.site.register(DueDateType, DueDateTypeAdmin)
 
 class IdentificationTypeAdmin(admin.TabularInline):
     model = IdentificationType
@@ -42,7 +48,7 @@ admin.site.register(ClientPremium, ClientPremiumAdmin)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ('invoice_id', "client_name","premium_name")
     readonly_fields = ('invoice_id',)
-    fields = ('invoice_id', "date","client_premium", "unit", "optional")
+    fields = ('invoice_id', "date","client_premium", "unit", "optional", "duedate")
 
     def client_name(self, obj):
         if obj.client_premium and obj.client_premium.client:

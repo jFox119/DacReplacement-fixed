@@ -155,12 +155,13 @@ class Invoice(models.Model):
     invoice_id = models.AutoField(primary_key=True)
     date = models.DateField() 
     client_premium = models.ForeignKey(ClientPremium, on_delete=models.CASCADE)
-
-    #Premium_ID = models.ForeignKey(Premium, on_delete=models.PROTECT)
     unit = models.IntegerField()
-    #date = models.DateField(null=True, blank=True)
-    optional = models.CharField(max_length=200)
+    optional = models.CharField(max_length=200, null=True, blank=True)
+    duedate = models.ForeignKey(DueDateType, on_delete=models.CASCADE)
+    #is_paid = models.BooleanField()
+    #paid_date = models.DateField(null=True, blank=True)
     history = HistoricalRecords()
+
 
     class Meta:
         db_table = "Invoices"
