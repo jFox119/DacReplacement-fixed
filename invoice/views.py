@@ -141,6 +141,7 @@ class InvoiceDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             context['form'] = InvoiceForm(instance=self.object)
+            context
             return context
 
 
@@ -307,6 +308,11 @@ def load_Client_Invoices(request, pk):
         print(item.client_premium)
     return render(request, 'invoice/partials/table_invoice_modal.html', context)
 
+def load_Invoice_Payment(request, pk):
+    invoice =  get_object_or_404(Invoice.objects.select_related('client_premium__client', 'duedate'), pk=pk)
+    context = {'invoice': invoice}
+
+    return render(request, 'invoice/partials/invoice_payment_modal.html', context)
 
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Frame, BaseDocTemplate, PageTemplate, NextPageTemplate, PageBreak, Spacer, Table, TableStyle

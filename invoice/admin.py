@@ -48,7 +48,7 @@ admin.site.register(ClientPremium, ClientPremiumAdmin)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ('invoice_id', "client_name","premium_name")
     readonly_fields = ('invoice_id',)
-    fields = ('invoice_id', "date","client_premium", "unit", "optional", "duedate")
+    fields = ('invoice_id', "date","client_premium", "unit", "optional", "duedate", "is_paid", "paid_amount", "paid_date")
 
     def client_name(self, obj):
         if obj.client_premium and obj.client_premium.client:

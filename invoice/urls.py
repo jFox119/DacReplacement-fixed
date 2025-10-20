@@ -33,8 +33,10 @@ urlpatterns = [
     path("pdf/statement/<int:pk>", views.pdfSingleInvoice, name="pdfSingleInvoice"),
 
     path('load_Client_Invoices/<int:pk>', views.load_Client_Invoices, name='load_Client_Invoices'),
+    path('load_Invoice_Payment/<int:pk>', views.load_Invoice_Payment, name='load_Invoice_Payment'),
     #path('load_Client_Invoices/', views.load_Client_Invoices, name='load_Client_Invoices'),
     
+
 
     #path("clients/edit/<int:pk>", views.ClientEditView.as_view(), name="client_edit"),
     

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django_htmx",
     "simple_history",
     'django.contrib.humanize',
+    'widget_tweaks',
 
     
 ]

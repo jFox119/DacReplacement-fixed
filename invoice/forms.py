@@ -2,16 +2,64 @@ from django import forms
 from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice
 from django.core.exceptions import ValidationError
 
+class DaisyUIDateInput(forms.DateInput):
+    # Set the input type to 'date' to use the browser's native date picker
+    input_type = 'date' 
 
+    def __init__(self, attrs=None, format=None):
+        # Define the default DaisyUI classes
+        default_classes = "input input-bordered input-md w-full"
+        
+        # Combine default classes with any custom classes passed in attrs
+        if attrs:
+            if 'class' in attrs:
+                attrs['class'] = f"{default_classes} {attrs['class']}"
+            else:
+                attrs['class'] = default_classes
+        else:
+            attrs = {'class': default_classes}
+            
+        # Ensure Django handles the format correctly for type="date"
+        # The HTML5 date input type requires format='%Y-%m-%d' for proper validation
+        super().__init__(attrs=attrs, format='%Y-%m-%d')
 
 
 #   Invoice
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['invoice_id', 'client_premium', 'unit', 'date', 'optional']
+        fields = ['invoice_id', 'is_paid', 'paid_amount','paid_date']
+        #fields = ['invoice_id', 'client_premium', 'unit', 'date', 'optional', 'is_paid', 'paid_date']
 
+    invoice_id =forms.CharField(
+        widget=forms.TextInput(attrs={
+            'class': 'input w-24',
+            'disabled': 'disabled'
+        })
+    )
 
+    is_paid = forms.BooleanField(
+        widget=forms.CheckboxInput(attrs={
+            'class': 'checkbox checkbox-sm checkbox-success'
+            #'class': 'input input-bordered'
+        })
+    )
+    paid_amount =forms.DecimalField(
+        widget=forms.NumberInput(attrs={
+            'step': 0.01,
+            'class': 'input input-bordered input-sm input-success',
+            'placeholder': '0.00',
+        })
+    )
+    paid_date = forms.DateField(
+        label="Payment Date",
+        widget=DaisyUIDateInput(attrs={'placeholder': 'DD-MM-YYYY',
+                                    'class': 'input input-bordered input-sm input-success w-40'
+        }),
+        # Also include the input format in the field for validation purposes if needed
+        input_formats=['%d-%m-%Y'],
+    )
+    '''
     unit =forms.CharField(
         widget=forms.TextInput(attrs={
             'class': 'input input-bordered w-full',
@@ -29,7 +77,7 @@ class InvoiceForm(forms.ModelForm):
             'placeholder': 'Notes/Comments',
         })
     )
-
+    '''
 
 class ClientForm(forms.ModelForm):
     class Meta:

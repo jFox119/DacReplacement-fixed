@@ -1,11 +1,32 @@
+ {% load widget_tweaks %}
   <!-- your_app/partials/invoice_form_partial.html -->
     <form hx-post="{% url 'invoice:invoice_edit' invoice.invoice_id %}"
           hx-target="#inner_invoice_modal"
           hx-swap="innerHTML">
         {% csrf_token %}
-        <table>
-            {{ form.as_table }}
-        </table>
+        <p>Invoice No. : {{ form.invoice_id }}</p>
+        <div class="form-control">
+          <label class="label cursor-pointer justify-start gap-4 w-40 label-bordered">
+              <!-- Renders the <input type="checkbox" class="checkbox checkbox-primary"> tag -->
+              {{ form.is_paid }}
+              <!-- Renders the <label> text -->
+              <span class="label-text">{{ form.is_paid.label }}?</span>
+          </label>
+        </div>
+        
+        <div class="form-control w-full max-w-xs"> 
+          <label class="label">
+              <span class="label-text">{{ form.paid_amount.label }}</span>
+          </label>
+            <p>${{ form.paid_amount }}</p>
+        </div>
+        <div class="form-control w-full max-w-xs w-40">
+            <label class="label label-sm w-40">
+                <span class="label-text">{{ form.paid_date.label }}</span>
+            </label>
+            {{ form.paid_date }}
+        </div>
+              
         <div class="modal-action">
           <button type="button" class="btn" onclick="invoice_modal.close()">Close</button>
           <button type="submit" class="btn btn-primary">Submit</button>
