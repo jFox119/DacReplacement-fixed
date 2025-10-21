@@ -1,6 +1,6 @@
 <div id="premium-filter-list">
   <fieldset class="fieldset bg-base-100 border-base-300 rounded-box w-fit border p-4 ">
-    <legend class="fieldset-legend">Filters</legend>
+    <legend class="fieldset-legend">Premiums</legend>
       {% if premiums %}
         {% for premium in premiums %}
           <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
@@ -23,5 +23,6 @@
       {% else %}
         <p>There are no premiums in the system.</p>
       {% endif %}
+
   </fieldset>
 </div>

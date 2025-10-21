@@ -154,16 +154,19 @@ class Invoice(models.Model):
 
     invoice_id = models.AutoField(primary_key=True)
     date = models.DateField() 
-    client_premium = models.ForeignKey(ClientPremium, on_delete=models.CASCADE)
+    client_premium = models.ForeignKey(ClientPremium, on_delete=models.PROTECT)
     unit = models.IntegerField()
     optional = models.CharField(max_length=200, null=True, blank=True)
-    duedate = models.ForeignKey(DueDateType, on_delete=models.CASCADE)
-    is_paid = models.BooleanField(null=True, blank=True, default=False)
-    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    paid_date = models.DateField(null=True, blank=True)
+    duedate = models.ForeignKey(DueDateType, on_delete=models.PROTECT)
     history = HistoricalRecords()
 
+    # could stay but not sure
+    is_paid = models.BooleanField(null=True, blank=True, default=False)
 
+    # moving to seperate Payments table
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    paid_date = models.DateField(null=True, blank=True)
+    
     class Meta:
         db_table = "Invoices"
         verbose_name = 'Invoices'
@@ -177,3 +180,21 @@ class Invoice(models.Model):
         """Returns the url to access a particular invoice record."""
         return reverse("invoice:invoice_detail", kwargs={"pk": self.pk})
     
+class Payments(models.Model):
+    payment_id = models.AutoField(primary_key=True)
+    invoice_id = models.ForeignKey(Invoice, on_delete=models.PROTECT)
+    payment_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateField()
+    
+    class Meta:
+        db_table = "Payments"
+        verbose_name = 'Payments'
+        verbose_name_plural = 'Payments'
+    
+    def __str__(self):
+        """String for representing the Model object."""
+        return f'{self.payment_id}' 
+    
+    #def get_absolute_url(self):
+    #    """Returns the url to access a particular invoice record."""
+    #    return reverse("invoice:invoice_detail", kwargs={"pk": self.pk})

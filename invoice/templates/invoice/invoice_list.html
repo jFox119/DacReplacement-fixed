@@ -5,7 +5,7 @@
         <tr>
           <th>Invoice #</th>
           <th>Client/Premium</th>
-          <th>Invoice Date</th>
+          <th>Invoice Date(m/d/y)</th>
         </tr>
       </thead>
       <tbody id="invoice-table-body">
@@ -13,7 +13,7 @@
           <tr>
             <td>{{invoice.invoice_id}}</td>
             <td>{{invoice.client_premium}}</td>
-            <td>{{invoice.date}}</td>
+            <td>{{invoice.date|date:"m-d-Y"}}</td>
             <td>
               <a class="btn btn-success" 
                 href="{% url 'invoice:pdfSingleInvoice' invoice.invoice_id %}">
@@ -22,12 +22,13 @@
             </td>
             <td>
               <button 
-              hx-get="{{ invoice.get_absolute_url }}"
-              hx-target="#inner_invoice_modal"
-              hx-trigger="click"
-              hx-on:click="invoice_modal.showModal()"
-              class="btn btn-success" >
-              Pay Invoice
+                hx-get="{{ invoice.get_absolute_url }}"
+                hx-target="#inner_invoice_modal"
+                hx-trigger="click"
+                hx-vals='{"pk": {{ invoice.pk }} }'
+                hx-on:click="invoice_modal.showModal()"
+                class="btn btn-success" >
+                Pay Invoice
             </button>
             </td>
           </tr>

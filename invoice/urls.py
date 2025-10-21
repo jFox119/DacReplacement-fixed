@@ -14,6 +14,8 @@ urlpatterns = [
     path("invoices/<int:pk>", views.InvoiceDetailView.as_view(), name='invoice_detail'),
     path('invoices/<int:pk>/edit/', views.InvoiceUpdateView.as_view(), name='invoice_edit'),
 
+    path('get-table-data/', views.get_table_data, name='get_table_data'),
+
     path('clients/', views.clients, name='clients'),
     path('clients/client_list', views.ClientListView.as_view(), name='client_list'),
     path("clients/<int:pk>", views.ClientDetailView.as_view(), name='client_detail'),

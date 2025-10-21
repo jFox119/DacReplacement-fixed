@@ -28,16 +28,16 @@ class DaisyUIDateInput(forms.DateInput):
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['invoice_id', 'is_paid', 'paid_amount','paid_date']
+        fields = ['is_paid', 'paid_amount','paid_date']
         #fields = ['invoice_id', 'client_premium', 'unit', 'date', 'optional', 'is_paid', 'paid_date']
 
-    invoice_id =forms.CharField(
-        widget=forms.TextInput(attrs={
-            'class': 'input w-24',
-            'disabled': 'disabled'
-        })
-    )
-
+    def __init__(self, *args, **kwargs):
+        # 1. Pop the custom 'pk' argument from kwargs
+        self.object_pk = kwargs.pop('pk', None) 
+        
+        # 2. Call the superclass's __init__ without the custom 'pk' argument
+        super().__init__(*args, **kwargs)
+    
     is_paid = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={
             'class': 'checkbox checkbox-sm checkbox-success'
@@ -53,11 +53,13 @@ class InvoiceForm(forms.ModelForm):
     )
     paid_date = forms.DateField(
         label="Payment Date",
-        widget=DaisyUIDateInput(attrs={'placeholder': 'DD-MM-YYYY',
+        input_formats=['%Y-%m-%d', '%m/%d/%Y'],
+        error_messages={'invalid': 'Please enter a valid date in YYYY-MM-DD or MM/DD/YYYY format.'},
+        widget=DaisyUIDateInput(attrs={'placeholder': 'MM-DD-YYYY',
                                     'class': 'input input-bordered input-sm input-success w-40'
         }),
         # Also include the input format in the field for validation purposes if needed
-        input_formats=['%d-%m-%Y'],
+        #input_formats=['%d-%m-%Y'],
     )
     '''
     unit =forms.CharField(

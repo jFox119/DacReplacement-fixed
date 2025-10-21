@@ -4,7 +4,7 @@
           hx-target="#inner_invoice_modal"
           hx-swap="innerHTML">
         {% csrf_token %}
-        <p>Invoice No. : {{ form.invoice_id }}</p>
+        <p>Invoice No. : {{ invoice.invoice_id }}</p>
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-4 w-40 label-bordered">
               <!-- Renders the <input type="checkbox" class="checkbox checkbox-primary"> tag -->

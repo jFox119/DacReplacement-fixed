@@ -51,7 +51,10 @@
         <div class="divider"></div>
       </tr>
       <tr>
-        {% include 'invoice/partials/premium_filter_list.html'%}
+        {% include 'invoice/partials/client_ddl_filter.html '%}
+      </tr>
+      <tr>
+        {% include 'invoice/partials/premium_filter_list.html' %}
       </tr>
       <tr>
         <a href="{% url 'invoice:invoices' %}">

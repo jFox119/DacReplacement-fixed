@@ -56,7 +56,7 @@ def searchTable(request):
         Q(client_premium__client__first_name__icontains=search_query) | 
         Q(client_premium__client__last_name__icontains=search_query) |
         Q(client_premium__premium__name__icontains=search_query)
-    )
+    ).order_by('date')
 
     #for item in invoices:
     #    client_first = item.client_premium.client.first_name
@@ -85,7 +85,7 @@ def filterTable(request, pk):
                     Q(client_premium__client__first_name__icontains=filter_query) | 
                     Q(client_premium__client__last_name__icontains=filter_query) |
                     Q(client_premium__premium__name__icontains=filter_query)
-                )
+                ).order_by('date')
                 #for item in invoices:
                 #    client_first = item.client_premium.client.first_name
                 #    prem = item.client_premium.premium.name
@@ -106,14 +106,15 @@ def filterTable(request, pk):
 
 
 def invoices(request):
-    #invoices = Invoice.objects.all()
-    invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').all()
-    form = InvoiceForm()
+    #invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').all()
+    clients = Client.objects.all()
+    #form = InvoiceForm()
     premiums = Premium.objects.all()
     context = {
-        'invoices': invoices,
-        'form': form,
+        #'invoices': invoices,
+        #'form': form,
         'premiums': premiums,
+        'clients': clients
     }
     return render(request, 'invoices.html', context)
 
@@ -141,7 +142,6 @@ class InvoiceDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             context['form'] = InvoiceForm(instance=self.object)
-            context
             return context
 
 
@@ -151,7 +151,19 @@ class InvoiceUpdateView(generic.UpdateView):
     template_name = 'invoice/partials/invoice_form_partial.html'
     success_url = reverse_lazy('invoice:invoices')  # Or use get_success_url()
 
+    def get_object(self, queryset=None):
+            # This method is automatically called by UpdateView to retrieve the object
+            # self.kwargs['pk'] will contain the primary key from the URL
+            return super().get_object(queryset)
+
+    # If you're using a FormView and need to pass the pk to the form's __init__
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['pk'] = self.kwargs['pk']  # Pass pk to the form
+        return kwargs
+
     def form_valid(self, form):
+        print("valid")
         # Process the form data (e.g., save to database)
         form.save()
 
@@ -161,7 +173,30 @@ class InvoiceUpdateView(generic.UpdateView):
         else:
             return super().form_valid(form)
 
+    def form_invalid(self, form):
+        print("invalid")
+        print(form.errors)
+        #return super().form_invalid(form)
+        return self.render_to_response(self.get_context_data(form=form))
 
+def get_table_data(request):
+    selected_item_id = request.GET.get('client_id') # Get the selected value from the dropdown
+    if selected_item_id and selected_item_id != 0:
+        # Filter your model based on the selected item_id
+        clients = Client.objects.filter(pk=selected_item_id).first()
+        invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client__id = selected_item_id).order_by('date')
+        form = InvoiceForm()
+        premiums = Premium.objects.all()
+        context = {
+            'invoices': invoices,
+            'form': form,
+            'premiums': premiums,
+            'clients': clients
+        }
+    else:
+        context = {} # Return an empty list if no item is selected
+
+    return render(request, 'invoice/invoice_list.html', context)
 
 
 
@@ -336,10 +371,8 @@ def pdfMultipleInvoices(request,pk):
     for obj in queryset:
         itemtotal = (obj.unit * obj.client_premium.dollar_amount)
         total += itemtotal
-    
     invMinID = queryset.first()
     invMaxID = queryset.last()
-    print(invoiceData.duedate.name)
 
 
     html_string = render_to_string('weasyprint/multi-invoice.html', 
@@ -353,7 +386,6 @@ def pdfMultipleInvoices(request,pk):
                                     }
     )
     #html_string = render_to_string('weasyprint/single_profile_pdf.html', {'client': client})
-
 
     response = HttpResponse(content_type="application/pdf")
     response["Content-Dispostition"] = f'inline; filename="{client.first_name}"'
