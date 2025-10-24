@@ -1,7 +1,7 @@
 from django.views.generic import View
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice
+from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice, Payments
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
@@ -9,14 +9,14 @@ from django.views import generic
 from django.views.generic.edit import FormMixin
 
 from django.views.decorators.http import require_http_methods
-from invoice.forms import ClientForm, ClientPremiumForm, PremiumForm, InvoiceForm
+from invoice.forms import ClientForm, ClientPremiumForm, PremiumForm, InvoiceForm, PaymentsForm
 from django.shortcuts import get_object_or_404
 
 from django.urls import reverse_lazy, reverse
 
 from django_htmx.http import HttpResponseClientRefresh
 
-from datetime import date
+from datetime import date, datetime
 from django.db.models import Q
 
 # REPORT LAB
@@ -42,7 +42,7 @@ def logoutView(request):
     logout(request)
     return redirect(reverse('logged_out'))
 
-def searchTable(request):
+def searchInvoiceTable(request):
     import time
     time.sleep(2)
     search_query = request.GET.get('search', '')
@@ -63,6 +63,26 @@ def searchTable(request):
     #    prem = item.client_premium.premium.name
     #    print("c:", client_first, "--  p: ", prem)
     return render(request, 'invoice/invoice_list.html', {'invoices': invoices})
+
+
+def searchClientsTable(request):
+    import time
+    time.sleep(2)
+    search_query = request.GET.get('search', '')
+
+    # Use select_related() to follow the foreign key relationships.
+    # The double underscore syntax (`__`) is used to traverse these relationships.
+    clients = Client.objects.filter(
+        Q(first_name__icontains=search_query) | 
+        Q(last_name__icontains=search_query) 
+    ).order_by('last_name')
+
+    #for item in invoices:
+    #    client_first = item.client_premium.client.first_name
+    #    prem = item.client_premium.premium.name
+    #    print("c:", client_first, "--  p: ", prem)
+    return render(request, 'invoice/client_list.html', {'clients': clients})
+
 
 def filterTable(request, pk):
     import time
@@ -104,7 +124,6 @@ def filterTable(request, pk):
 
 
 
-
 def invoices(request):
     #invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').all()
     clients = Client.objects.all()
@@ -141,7 +160,7 @@ class InvoiceDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
-            context['form'] = InvoiceForm(instance=self.object)
+            #context['form'] = InvoiceForm(instance=self.object)
             return context
 
 
@@ -179,17 +198,17 @@ class InvoiceUpdateView(generic.UpdateView):
         #return super().form_invalid(form)
         return self.render_to_response(self.get_context_data(form=form))
 
-def get_table_data(request):
+def get_Invoice_Table_Data(request):
     selected_item_id = request.GET.get('client_id') # Get the selected value from the dropdown
     if selected_item_id and selected_item_id != 0:
         # Filter your model based on the selected item_id
         clients = Client.objects.filter(pk=selected_item_id).first()
         invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client__id = selected_item_id).order_by('date')
-        form = InvoiceForm()
+        #form = InvoiceForm()
         premiums = Premium.objects.all()
         context = {
             'invoices': invoices,
-            'form': form,
+            #'form': form,
             'premiums': premiums,
             'clients': clients
         }
@@ -198,6 +217,43 @@ def get_table_data(request):
 
     return render(request, 'invoice/invoice_list.html', context)
 
+def get_Client_Table_Data(request):
+    selected_item_id = request.GET.get('client_id') # Get the selected value from the dropdown
+    if selected_item_id and selected_item_id != 0:
+        # Filter your model based on the selected item_id
+        clients = Client.objects.filter(pk=selected_item_id)
+        context = {
+            'clients': clients
+        }
+    else:
+        context = {} # Return an empty list if no item is selected
+
+    return render(request, 'invoice/client_list.html', context)
+
+def make_payment(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    print("called")
+    print(invoice)
+    if request.method == 'POST':
+        form = PaymentsForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.invoice_id = invoice
+            payment.save()
+            
+            # After successful payment, render a new row for the table or confirmation message.
+            # You can send back an empty response to close the modal.
+            return HttpResponse(status=204) # 204 No Content for a successful HTMX response
+        else:
+            print("invalid")
+            print(form.errors)
+            print(form.data)
+            # If form is invalid, re-render the modal content with errors
+            return render(request, 'invoice/partials/payment_modal_content.html', {'form': form, 'invoice': invoice})
+    else:
+        # For a GET request, render the initial form
+        form = PaymentsForm(initial={'invoice': invoice})
+    return render(request, 'invoice/partials/payment_modal_content.html', {'form': form, 'invoice': invoice})
 
 
 class adminCheckView(View):
@@ -208,11 +264,15 @@ class adminCheckView(View):
             return HttpResponse("You are not a superuser.")
 
 def clients(request):
-    clients = Client.objects.all()
+    ddlclients = Client.objects.all()
     form = ClientForm()
+    years = []
+    for i in range(2010, (datetime.now().year + 5)):
+        years.append((i,i))
     context = {
-        'clients': clients,
+        'ddlclients': ddlclients,
         'form': form,
+        'years': years
     }
     return render(request, 'clients.html', context)
 
@@ -345,9 +405,54 @@ def load_Client_Invoices(request, pk):
 
 def load_Invoice_Payment(request, pk):
     invoice =  get_object_or_404(Invoice.objects.select_related('client_premium__client', 'duedate'), pk=pk)
-    context = {'invoice': invoice}
+    payment = get_object_or_404(Payments.objects.select_related('invoice__client_premium__client'), pk=pk)
+    context = {'invoice': invoice,
+               'payment': payment}
 
     return render(request, 'invoice/partials/invoice_payment_modal.html', context)
+def load_Payments(request, pk):
+    invoice = get_object_or_404(Invoice.objects.select_related('client_premium__client', 'duedate'), pk=pk)
+    payments = Payments.objects.filter(invoice_id=pk)
+
+    context = {'invoice': invoice,
+               'payments': payments}
+
+    return render(request, 'invoice/partials/invoice_payment_modal.html', context)
+
+
+from django.db import transaction
+def manage_invoice(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    
+    # Filter the formset to only show payments for the current invoice instance
+    queryset = Payments.objects.filter(invoice_id=pk)
+    print("called")
+    print(request.method)
+  
+    if request.method == 'POST':
+        print("POST")
+        formset = PaymentsForm(request.POST, queryset=queryset)
+        if formset.is_valid():
+            with transaction.atomic():
+                # Save each form in the formset
+                for form in formset:
+                    if form.cleaned_data and not form.cleaned_data.get('DELETE'):
+                        payment = form.save(commit=False)
+                        payment.invoice = invoice  # Link the payment to the specific invoice
+                        payment.save()
+                
+                # Optional: Delete marked payments
+                formset.save() 
+                
+                # You might want to recalculate invoice status/balance here
+                
+            return redirect('invoice/partials/manage_invoice.html', invoice_id=invoice.invoice_id)
+    else:
+        formset = PaymentsForm(queryset)
+
+        
+    return render(request, 'invoice/partials/manage_invoice.html', {'invoice': invoice, 'formset': formset})
+
 
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Frame, BaseDocTemplate, PageTemplate, NextPageTemplate, PageBreak, Spacer, Table, TableStyle

@@ -1,0 +1,30 @@
+<!-- your_app/partials/payment_modal_content.html -->
+<h3 class="font-bold text-lg">Make a Payment for Invoice #{{ invoice.invoice_id }}</h3>
+<form
+    hx-post="{% url 'invoice:make_payment' invoice.invoice_id %}"
+    hx-target="#inner_payments_modal"
+    hx-swap="innerHTML"
+>
+    {% csrf_token %}
+    <div class="py-4">
+        <label class="label">
+            <span class="label-text">Payment Amount</span>
+        </label>
+        {{ form.payment_amount }}
+        {% for error in form.payment_amount.errors %}
+            <span class="text-error">{{ error }}</span>
+        {% endfor %}
+        
+        <label class="label">
+            <span class="label-text">Payment Date</span>
+        </label>
+        {{ form.payment_date }}
+        {% for error in form.payment_date.errors %}
+            <span class="text-error">{{ error }}</span>
+        {% endfor %}
+    </div>
+    <div class="modal-action">
+        <button type="button" class="btn" onclick="payments_modal.close()">Close</button>
+        <button class="btn btn-primary" type="submit">Submit Payment</button>
+    </div>
+</form>

@@ -164,8 +164,8 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(null=True, blank=True, default=False)
 
     # moving to seperate Payments table
-    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    paid_date = models.DateField(null=True, blank=True)
+    #paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    #paid_date = models.DateField(null=True, blank=True)
     
     class Meta:
         db_table = "Invoices"
@@ -182,7 +182,7 @@ class Invoice(models.Model):
     
 class Payments(models.Model):
     payment_id = models.AutoField(primary_key=True)
-    invoice_id = models.ForeignKey(Invoice, on_delete=models.PROTECT)
+    invoice_id = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name='payments')
     payment_amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateField()
     
@@ -192,8 +192,7 @@ class Payments(models.Model):
         verbose_name_plural = 'Payments'
     
     def __str__(self):
-        """String for representing the Model object."""
-        return f'{self.payment_id}' 
+        return f"Payment of {self.payment_amount} on {self.payment_date} for Invoice #{self.invoice_id}"
     
     #def get_absolute_url(self):
     #    """Returns the url to access a particular invoice record."""

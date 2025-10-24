@@ -1,15 +1,39 @@
+{% load math_filters %}
+
 <!-- partials/table_modal_content.html -->
 
-<h>{{ invoice.invoice_id}}</h>
+<h>Invoice No.: {{ invoice.invoice_id}}</h>
 <div class="modal-body overflow-y-auto ">
     <div class="p-4 text-white " >
         <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 table-sm h-80">
-            <p>Paid?</p>
+            {% if payments %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Payment ID</th>
+                        <th>Date</th>
+                        <th>Payment Amount</th>
+                        <!-- Add more columns as needed -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr class="hover:bg-base-300">
+                        <td>{{ payment.payment_id }}</td>
+                        <td>{{ payment.payment_date|date:'M-d-Y'}}</td>
+                        <td>{{ payment.payment_amount|currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <p>There are no payments made for this invoice.</p>
+            {% endif %}
             
         </div>
     </div>
     <div class="modal-action">
-        <button type="button" class="btn" onclick="invoice_modal.close()">Close</button>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="button" class="btn" onclick="payments_modal.close()">Close</button>
+        <!--<button type="submit" class="btn btn-primary">Submit</button>-->
     </div>
 </div>

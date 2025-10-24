@@ -1,5 +1,5 @@
 from django.contrib import admin
-from invoice.models import  Client, IdentificationType, StatusType, DueDateType,ClientIdentification, ITEMCHANGES, ClientPremium, Premium, Invoice
+from invoice.models import  Client, IdentificationType, StatusType, DueDateType,ClientIdentification, ITEMCHANGES, ClientPremium, Premium, Invoice, Payments
 
 # Register your models here.
 admin.site.register(ITEMCHANGES)
@@ -7,6 +7,7 @@ admin.site.register(Client)
 admin.site.register(StatusType)
 admin.site.register(DueDateType)
 admin.site.register(IdentificationType)
+admin.site.register(Payments)
 #admin.site.register(ClientIdentification)
 
 

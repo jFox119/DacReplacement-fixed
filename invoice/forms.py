@@ -1,6 +1,7 @@
 from django import forms
-from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice
+from .models import Client, ClientIdentification, ClientPremium, Premium, StatusType, Invoice, Payments
 from django.core.exceptions import ValidationError
+from django.forms import inlineformset_factory, modelformset_factory
 
 class DaisyUIDateInput(forms.DateInput):
     # Set the input type to 'date' to use the browser's native date picker
@@ -23,9 +24,40 @@ class DaisyUIDateInput(forms.DateInput):
         # The HTML5 date input type requires format='%Y-%m-%d' for proper validation
         super().__init__(attrs=attrs, format='%Y-%m-%d')
 
+'''PaymentFormSet = inlineformset_factory(
+    Invoice,
+    Payments,
+    fields=('payment_date', 'payment_amount'),
+    extra=1, # Show one empty form by default
+)
+'''
+class PaymentsForm(forms.ModelForm):
+    class Meta:
+        model = Payments
+        fields = ['payment_amount', 'payment_date']
+
+        payment_date = forms.DateField(
+            label="Payment Date",
+            input_formats=['%Y-%m-%d', '%m/%d/%Y'],
+            error_messages={'invalid': 'Please enter a valid date in YYYY-MM-DD or MM/DD/YYYY format.'},
+        )
+
+        widgets = {
+            'payment_amount' : forms.NumberInput(attrs={'step': 0.01,
+                                                        'class': 'input input-bordered input-sm input-success',
+                                                        'placeholder': '$0.00'}),
+            'payment_date' : DaisyUIDateInput(attrs={'placeholder': 'MM-DD-YYYY',
+                                                     'class': 'input input-bordered input-sm input-success w-40'})
+        }
+
+
 
 #   Invoice
 class InvoiceForm(forms.ModelForm):
+    class Meta:
+        model = Invoice
+        fields = ['unit', 'date']
+    '''
     class Meta:
         model = Invoice
         fields = ['is_paid', 'paid_amount','paid_date']
@@ -62,6 +94,8 @@ class InvoiceForm(forms.ModelForm):
         #input_formats=['%d-%m-%Y'],
     )
     '''
+
+    '''
     unit =forms.CharField(
         widget=forms.TextInput(attrs={
             'class': 'input input-bordered w-full',
@@ -81,6 +115,7 @@ class InvoiceForm(forms.ModelForm):
     )
     '''
 
+#   Clients
 class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
@@ -119,7 +154,6 @@ class ClientForm(forms.ModelForm):
             'placeholder': 'address'
         })
     )
-
 
 #   Premiums
 class ClientPremiumForm(forms.ModelForm):
@@ -174,7 +208,6 @@ class ClientPremiumForm(forms.ModelForm):
             'class': 'input input-bordered w-full',
         })
     )
-
 
 #   Premium Type
 class PremiumForm(forms.ModelForm):

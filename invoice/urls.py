@@ -6,7 +6,8 @@ app_name = "invoice"
 urlpatterns = [
     path("", views.index, name="index"),
     path('logout/', views.logoutView, name='logout'),
-    path('search/', views.searchTable, name='search'),
+    path('searchInvoice/', views.searchInvoiceTable, name='searchInvoice'),
+    path('searchClients/', views.searchClientsTable, name='searchClients'),
     path('filter/<int:pk>', views.filterTable, name='filter'),
 
     path('invoices/', views.invoices, name='invoices'),
@@ -14,7 +15,9 @@ urlpatterns = [
     path("invoices/<int:pk>", views.InvoiceDetailView.as_view(), name='invoice_detail'),
     path('invoices/<int:pk>/edit/', views.InvoiceUpdateView.as_view(), name='invoice_edit'),
 
-    path('get-table-data/', views.get_table_data, name='get_table_data'),
+    path('get_Invoice_Table_Data/', views.get_Invoice_Table_Data, name='get_Invoice_Table_Data'),
+    path('get_Client_Table_Data/', views.get_Client_Table_Data, name='get_Client_Table_Data'),
+
 
     path('clients/', views.clients, name='clients'),
     path('clients/client_list', views.ClientListView.as_view(), name='client_list'),
@@ -36,6 +39,11 @@ urlpatterns = [
 
     path('load_Client_Invoices/<int:pk>', views.load_Client_Invoices, name='load_Client_Invoices'),
     path('load_Invoice_Payment/<int:pk>', views.load_Invoice_Payment, name='load_Invoice_Payment'),
+    
+    path('make_payment/<int:pk>/', views.make_payment, name='make_payment'),
+    
+    path('load_Payments/<int:pk>', views.load_Payments, name='load_Payments'),
+    #path('manage_invoice/<int:pk>', views.manage_invoice, name='manage_invoice'),
     #path('load_Client_Invoices/', views.load_Client_Invoices, name='load_Client_Invoices'),
     
 

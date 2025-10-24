@@ -1,60 +1,64 @@
-{% if clients %}
-  <table class="table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Address</th>
-      </tr>
-    </thead>
-    <tbody id="client-table-body">
-      {% for client in clients %}
+<div id="client-list">
+  {% if clients %}
+    <table class="table">
+      <thead>
         <tr>
-          <td>{{client.id}}</td>
-          <td>{{client.first_name}} {{client.last_name}}</td>
-          <td>{{client.address}}</td>
-          <!--<td>
-            <button 
-              hx-get="{{ client.get_absolute_url }}"
-              hx-target="#inner_client_modal"
-              hx-trigger="click"
-              hx-on:click="client_modal.showModal()"
-              class="btn btn-success" >
-              Edit
-            </button>
-          </td>-->
-          <td>
-            <button hx-get="{% url 'invoice:load_Client_Invoices' client.id%}"
-                    hx-target="#inner_client_invoice_modal"
-                    hx-trigger="click"
-                    hx-on:click="client_invoice_modal.showModal()"
-                    class="btn btn-success" >
-                      All Client Statements
-              </button>
-          </td>
-          <td>
-            <a class="btn btn-success" 
-              href="{% url 'invoice:pdfMultipleInvoices' client.id %}">
-                Full Statement
-            </a>
-          </td>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Invoice List</th>
+          <th>Full Statement</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <input type="checkbox" id="my_modal_toggle" class="modal-toggle" />
-  <dialog id="client_modal" class="modal">
-    <div class="modal-box" id="inner_client_modal">
-    </div>
-  </dialog>
+      </thead>
+      <tbody id="client-table-body">
+        {% for client in clients %}
+          <tr>
+            <td>{{client.id}}</td>
+            <td>{{client.first_name}} {{client.last_name}}</td>
+            <td>{{client.address}}</td>
+            <!--<td>
+              <button 
+                hx-get="{{ client.get_absolute_url }}"
+                hx-target="#inner_client_modal"
+                hx-trigger="click"
+                hx-on:click="client_modal.showModal()"
+                class="btn btn-success" >
+                Edit
+              </button>
+            </td>-->
+            <td>
+              <button hx-get="{% url 'invoice:load_Client_Invoices' client.id%}"
+                      hx-target="#inner_client_invoice_modal"
+                      hx-trigger="click"
+                      hx-on:click="client_invoice_modal.showModal()"
+                      class="btn btn-success btn-sm" >
+                        All Client Statements
+                </button>
+            </td>
+            <td>
+              <a class="btn btn-success btn-sm" 
+                href="{% url 'invoice:pdfMultipleInvoices' client.id %}">
+                  Full Statement
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <input type="checkbox" id="my_modal_toggle" class="modal-toggle" />
+    <dialog id="client_modal" class="modal">
+      <div class="modal-box" id="inner_client_modal">
+      </div>
+    </dialog>
 
-  <input type="checkbox" id="my_CI_modal_toggle" class="modal-toggle" />
-  <dialog id="client_invoice_modal" class="modal">
-    <div class="modal-box max-w-2xl" id="inner_client_invoice_modal">
-    </div>
-  </dialog>
-  
+    <input type="checkbox" id="my_CI_modal_toggle" class="modal-toggle" />
+    <dialog id="client_invoice_modal" class="modal">
+      <div class="modal-box max-w-2xl" id="inner_client_invoice_modal">
+      </div>
+    </dialog>
+    
 
-{% else %}
-  <p>There are no clients in the system.</p>
-{% endif %}
+  {% else %}
+    <p>Please use search bar and filters to show Clients.</p>
+  {% endif %}
+</div>

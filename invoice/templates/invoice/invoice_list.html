@@ -14,23 +14,45 @@
             <td>{{invoice.invoice_id}}</td>
             <td>{{invoice.client_premium}}</td>
             <td>{{invoice.date|date:"m-d-Y"}}</td>
-            <td>
+            <!---<td>
               <a class="btn btn-success" 
                 href="{% url 'invoice:pdfSingleInvoice' invoice.invoice_id %}">
                   pdf
               </a>
             </td>
+            -->
+            <td>
+              <button hx-get="{% url 'invoice:load_Payments' invoice.invoice_id %}"
+                      hx-target="#inner_payments_modal"
+                      hx-trigger="click"
+                      hx-on:click="payments_modal.showModal()"
+                      class="btn btn-success btn-sm" >
+                        View Payments
+              </button>
+            </td>
+            <td>
+                <button
+                    hx-get="{% url 'invoice:make_payment' invoice.invoice_id %}"
+                    hx-trigger="click"
+                    hx-target="#inner_payments_modal"
+                    hx-on:click="payments_modal.showModal()"
+                    class="btn btn-primary btn-sm" >
+                    Make Payment
+                </button>
+            </td>
+            <!--
             <td>
               <button 
-                hx-get="{{ invoice.get_absolute_url }}"
-                hx-target="#inner_invoice_modal"
-                hx-trigger="click"
-                hx-vals='{"pk": {{ invoice.pk }} }'
-                hx-on:click="invoice_modal.showModal()"
-                class="btn btn-success" >
-                Pay Invoice
-            </button>
+                  hx-get="{{ invoice.get_absolute_url }}"
+                  hx-target="#inner_invoice_modal"
+                  hx-trigger="click"
+                  hx-vals='{"pk": {{ invoice.pk }} }'
+                  hx-on:click="invoice_modal.showModal()"
+                  class="btn btn-success" >
+                  Pay Invoice
+              </button>
             </td>
+            -->
           </tr>
         {% endfor %}
       </tbody>
@@ -38,7 +60,12 @@
     <dialog id="invoice_modal" class="modal">
       <div class="modal-box max-w-sm" id="inner_invoice_modal"></div>
     </dialog>
+    <input type="checkbox" id="my_modal_toggle" class="modal-toggle" />
+    <dialog id="payments_modal" class="modal">
+      <div class="modal-box" id="inner_payments_modal">
+      </div>
+    </dialog>
   {% else %}
-    <p>There are no invoices in the system.</p>
+    <p>Please use search bar and filters to show Invoices.</p>
   {% endif %}
 </div>

@@ -39,7 +39,7 @@
             class="grow" 
             placeholder="Search"
             name="search"
-            hx-get="{% url 'invoice:search' %}"
+            hx-get="{% url 'invoice:searchInvoice' %}"
             hx-trigger="keyup delay:500ms"
             hx-target="#invoice-list" 
             hx-on::before-request="document.getElementById('invoice-list').style.opacity = 0.4;"
@@ -51,7 +51,7 @@
         <div class="divider"></div>
       </tr>
       <tr>
-        {% include 'invoice/partials/client_ddl_filter.html '%}
+        {% include 'invoice/partials/invoice_client_ddl_filter.html '%}
       </tr>
       <tr>
         {% include 'invoice/partials/premium_filter_list.html' %}

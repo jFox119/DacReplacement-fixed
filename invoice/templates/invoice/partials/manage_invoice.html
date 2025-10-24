@@ -1,0 +1,47 @@
+<!-- manage_invoice.html -->
+
+<h>Invoice No.: {{ invoice.invoice_id}}</h>
+<div class="modal-body overflow-y-auto ">
+    <div class="p-4 text-white " >
+        <div class="overflow-x-auto rounded-box border border-base-content/5 border-white bg-base-100 table-sm h-48">
+            <!--<p>Total Amount: {{ invoice.total_amount }}</p>
+            <p>Balance Due: {{ invoice.get_balance_due }}</p>
+            <p>Total Paid: {{ invoice.get_total_paid }}</p>
+            -->
+            <form method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+                
+                <div id="payment-formset-container" class="space-y-4">
+                    <!-- Loop through each form in the formset -->
+                    {% for form in formset %}
+                        <div class="p-4 shadow-sm bg-base-100">
+                            <!-- Render hidden fields manually (like ID, DELETE) -->
+                            {{ form.invoice_id }}
+                                
+                            <div class="form-control w-full max-w-xs"> 
+                            <label class="label">
+                                <span class="label-text">{{ form.payment_amount.label }}</span>
+                            </label>
+                                <p>${{ form.payment_amount }}</p>
+                            </div>
+                            <div class="form-control w-full max-w-xs w-40">
+                                <label class="label label-sm w-40">
+                                    <span class="label-text">{{ form.payment_date.label }}</span>
+                                </label>
+                                {{ form.payment_date }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div> 
+                <div class="modal-action">
+                    <button type="button" class="btn" onclick="payments_modal.close()">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div> 
+            </form>
+        </div>
+        
+    </div>
+</div>
+
+

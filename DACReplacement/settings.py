@@ -118,7 +118,7 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'America/New_York'
 
 DATE_FORMAT = ( ( 'd-m-Y' ))
-DATE_INPUT_FORMATS = ( ('%d-%m-%Y'),)
+DATE_INPUT_FORMATS = ( ('%d-%m-%Y'),('%m-%d-%Y'),('%Y-%m-%d'))
 DATETIME_FORMAT = (( 'd-m-Y H:i' ))
 DATETIME_INPUT_FORMATS = (('%d-%m-%Y %H:%i'),)
 

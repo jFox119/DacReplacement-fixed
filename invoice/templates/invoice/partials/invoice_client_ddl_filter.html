@@ -3,7 +3,7 @@
         <legend class="fieldset-legend">Clients</legend>
         {% if clients %}
             <select class="select select-bordered w-full max-w-xs"
-                    hx-get="{% url 'invoice:get_table_data' %}" 
+                    hx-get="{% url 'invoice:get_Invoice_Table_Data' %}" 
                     hx-target="#invoice-list" 
                     hx-trigger="change" 
                     name="client_id">
