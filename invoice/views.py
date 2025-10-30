@@ -87,15 +87,16 @@ def searchClientsTable(request):
 def filterTable(request, pk):
     import time
     time.sleep(1)
-    #print(request)
     if request.method == 'POST':
         if 'filter' in request.POST:
             is_active = 'filter' in request.POST
-            #print(is_active)
             if is_active:
                 filter_query = get_object_or_404(Premium.objects.select_related(), pk=pk)
                 #filter_query = request.GET.get('filter', '')
 
+
+                currList = request.GET.get('invoices')
+                print(currList)
                 # Use select_related() to follow the foreign key relationships.
                 # The double underscore syntax (`__`) is used to traverse these relationships.
                 invoices = Invoice.objects.select_related(
@@ -129,11 +130,17 @@ def invoices(request):
     clients = Client.objects.all()
     #form = InvoiceForm()
     premiums = Premium.objects.all()
+    currYear =(datetime.now().year)
+    years = []
+    for i in range((datetime.now().year - 5), (datetime.now().year + 5)):
+        years.append(i)
     context = {
         #'invoices': invoices,
         #'form': form,
         'premiums': premiums,
-        'clients': clients
+        'clients': clients,
+        'years': years,
+        'currYear': currYear
     }
     return render(request, 'invoices.html', context)
 
@@ -199,26 +206,36 @@ class InvoiceUpdateView(generic.UpdateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 def get_Invoice_Table_Data(request):
-    selected_item_id = request.GET.get('client_id') # Get the selected value from the dropdown
-    if selected_item_id and selected_item_id != 0:
+    selected_item_id = request.GET.get('client-ddl') # Get the selected value from the dropdown
+    selected_year = request.GET.get('year-ddl')
+    selected_prem = request.GET.get('premium-ddl')
+    if selected_item_id and selected_item_id != '0':
+
         # Filter your model based on the selected item_id
         clients = Client.objects.filter(pk=selected_item_id).first()
-        invoices = Invoice.objects.select_related('client_premium__client', 'client_premium__premium').filter(client_premium__client__id = selected_item_id).order_by('date')
-        #form = InvoiceForm()
         premiums = Premium.objects.all()
+        #form = InvoiceForm()
+        invoices = Invoice.objects.select_related(
+                        'client_premium__client', 'client_premium__premium'
+                ).filter(
+                        client_premium__client__id = selected_item_id,
+                        client_premium__premium__id=selected_prem, 
+                        date__year=selected_year
+                ).order_by('date')   
         context = {
-            'invoices': invoices,
-            #'form': form,
-            'premiums': premiums,
-            'clients': clients
-        }
+                'invoices': invoices,
+                #'form': form,
+                'premiums': premiums,
+                'clients': clients
+            }
     else:
-        context = {} # Return an empty list if no item is selected
+        context = {'emptyMessage': "You search returned zero results"} # Return an empty list if no item is selected
 
     return render(request, 'invoice/invoice_list.html', context)
 
 def get_Client_Table_Data(request):
     selected_item_id = request.GET.get('client_id') # Get the selected value from the dropdown
+    
     if selected_item_id and selected_item_id != 0:
         # Filter your model based on the selected item_id
         clients = Client.objects.filter(pk=selected_item_id)
@@ -232,8 +249,6 @@ def get_Client_Table_Data(request):
 
 def make_payment(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
-    print("called")
-    print(invoice)
     if request.method == 'POST':
         form = PaymentsForm(request.POST)
         if form.is_valid():
@@ -241,13 +256,13 @@ def make_payment(request, pk):
             payment.invoice_id = invoice
             payment.save()
             
+            reponse = HttpResponse(status=204)
+            reponse['HX-Trigger'] = 'closeModal'
+            return reponse
             # After successful payment, render a new row for the table or confirmation message.
             # You can send back an empty response to close the modal.
-            return HttpResponse(status=204) # 204 No Content for a successful HTMX response
+            #return HttpResponse(status=204) # 204 No Content for a successful HTMX response
         else:
-            print("invalid")
-            print(form.errors)
-            print(form.data)
             # If form is invalid, re-render the modal content with errors
             return render(request, 'invoice/partials/payment_modal_content.html', {'form': form, 'invoice': invoice})
     else:
@@ -266,13 +281,11 @@ class adminCheckView(View):
 def clients(request):
     ddlclients = Client.objects.all()
     form = ClientForm()
-    years = []
-    for i in range(2010, (datetime.now().year + 5)):
-        years.append((i,i))
+    
     context = {
         'ddlclients': ddlclients,
         'form': form,
-        'years': years
+        
     }
     return render(request, 'clients.html', context)
 

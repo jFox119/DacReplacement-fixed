@@ -54,12 +54,23 @@
         {% include 'invoice/partials/invoice_client_ddl_filter.html '%}
       </tr>
       <tr>
-        {% include 'invoice/partials/premium_filter_list.html' %}
+        {% include 'invoice/partials/invoice_year_ddl_filter.html '%}
+      </tr>
+      <tr>
+        {% include 'invoice/partials/invoice_premium_ddl_filter.html' %}
       </tr>
       <tr>
         <a href="{% url 'invoice:invoices' %}">
             <button type="submit" class="btn btn-sm btn-success">Clear</button>
         </a>
+        <button class="btn btn-sm btn-success"
+                hx-get="{% url 'invoice:get_Invoice_Table_Data' %}" 
+                hx-include="#client-ddl, #year-ddl, #premium-ddl"
+                hx-target="#invoice-list" 
+                hx-trigger="click" 
+                >
+                Submit
+        </button>
       </tr>
     </table>
   </div>

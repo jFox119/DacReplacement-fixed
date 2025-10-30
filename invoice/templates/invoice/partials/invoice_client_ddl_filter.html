@@ -3,10 +3,8 @@
         <legend class="fieldset-legend">Clients</legend>
         {% if clients %}
             <select class="select select-bordered w-full max-w-xs"
-                    hx-get="{% url 'invoice:get_Invoice_Table_Data' %}" 
-                    hx-target="#invoice-list" 
-                    hx-trigger="change" 
-                    name="client_id">
+                    name="client-ddl"
+                    >
                 <option value="0">--------------</option>
                 {% for client in clients %}
                     <option value="{{client.id}}">{{ client.first_name }} {{client.last_name }}</option>
@@ -17,3 +15,9 @@
         {% endif %}
     </fieldset>
 </div>
+
+
+<!--hx-get="{% url 'invoice:get_Invoice_Table_Data' %}" 
+                    hx-target="#invoice-list" 
+                    hx-trigger="change" 
+                    name="client_id"-->

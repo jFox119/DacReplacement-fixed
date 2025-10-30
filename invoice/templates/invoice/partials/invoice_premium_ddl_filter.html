@@ -1,0 +1,17 @@
+<div id="premium-ddl">
+    <fieldset class="fieldset bg-base-100 border-base-300 rounded-box w-90 border p-4 ">
+        <legend class="fieldset-legend">Premiums</legend>
+        {% if premiums %}
+            <select class="select select-bordered w-full max-w-xs"
+                    name="premium-ddl"
+                    >
+                <option value="0">--------------</option>
+                {% for premium in premiums %}
+                    <option value="{{premium.id}}">{{ premium.name }}</option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <p>There are no premiums in the system.</p>
+        {% endif %}
+    </fieldset>
+</div>

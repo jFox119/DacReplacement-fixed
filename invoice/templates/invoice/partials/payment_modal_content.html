@@ -4,6 +4,7 @@
     hx-post="{% url 'invoice:make_payment' invoice.invoice_id %}"
     hx-target="#inner_payments_modal"
     hx-swap="innerHTML"
+    hx-trigger="submit"
 >
     {% csrf_token %}
     <div class="py-4">

@@ -1,0 +1,22 @@
+<!-- partials/invoice_year_ddl_filter.html -->
+<div id="year-ddl">
+    <fieldset class="fieldset bg-base-100 border-base-300 rounded-box w-90 border p-4 ">
+        <legend class="fieldset-legend">Year</legend>
+        {% if years %}
+            <select class="select select-bordered w-full max-w-xs"
+                    name="year-ddl"
+                    >
+                {% for year in years %}
+                    <option value="{{year}}">{{ year }}</option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <p>There are no years in the system.</p>
+        {% endif %}
+    </fieldset>
+</div>
+
+<!--hx-get="{% url 'invoice:get_Invoice_Table_Data' %}" 
+                    hx-target="#invoice-list" 
+                    hx-trigger="change"
+                    name="year"-->

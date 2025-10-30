@@ -57,15 +57,31 @@
         {% endfor %}
       </tbody>
     </table>
+    <!--
     <dialog id="invoice_modal" class="modal">
       <div class="modal-box max-w-sm" id="inner_invoice_modal"></div>
     </dialog>
+    -->
     <input type="checkbox" id="my_modal_toggle" class="modal-toggle" />
     <dialog id="payments_modal" class="modal">
       <div class="modal-box" id="inner_payments_modal">
       </div>
     </dialog>
   {% else %}
-    <p>Please use search bar and filters to show Invoices.</p>
+    {% if emptyMessage %}
+      <p>{{ emptyMessage }}</p>
+    {% else %}
+      <p>Please use search bar and filters to show Invoices.</p>
+    {% endif %}
   {% endif %}
 </div>
+
+<script>
+    document.body.addEventListener('closeModal', function(event) {
+        var myModal = document.getElementById('payments_modal');
+        if (myModal) {
+            // remove the modal from the DOM entirely if using outerHTML swap
+            myModal.remove();
+        }
+    });
+</script>
